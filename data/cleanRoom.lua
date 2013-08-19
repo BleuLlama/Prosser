@@ -10,8 +10,8 @@ room = nil;
 exits = nil;
 -- example:
 --	exits = {
--- 		{ id=0, name="North", alias="N", lua="room002" },
--- 		{ id=0, name="South", alias="S", lua="room003" },
+-- 		{ name="North", alias="N", lua="room002" },
+-- 		{ name="South", alias="S", lua="room003" },
 -- 	};
 
 -- list of items

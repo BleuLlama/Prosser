@@ -23,7 +23,9 @@ Prosser is distributed with an MIT license. It is included with the
 source files.
 
 
-# Theory Operation
+# User Operation
+
+# Internal Operation
 
 ## Startup WAD Discovery
 
@@ -171,21 +173,19 @@ to "Bedroom" as you see there.
 There are some bits of code you will need to install to get this
 to work:
 
-    BLZip
+ - BLZip
+  - BLZip is my minizip-wrapping class thingy.  You can retrieve 
+    it from https://github.com/BleuLlama/BLZip
 
-	BLZip is my minizip-wrapping class thingy.  You can retrieve it
-	from https://github.com/BleuLlama/BLZip
-
-    zlib-1.2.8
-	
-	The base source tree from zlib contains a few files that are used
-	to build the zip library.  
+ - zlib-1.2.8
+  - The base source tree from zlib contains a few files that are used
+    to build the zip library.  
 
 In the contrib/makefile folder, set the two variables to point to
 these directories:
 
-        BLZIP_DIR := /Users/sdl/src/git/BLZip
-        ZLIB_DIR := /Users/sdl/src/notme/zlib-1.2.8
+    BLZIP_DIR := /Users/sdl/src/git/BLZip
+    ZLIB_DIR := /Users/sdl/src/notme/zlib-1.2.8
 
 Once you have this all set up, you should be able to just type
 'make' in the contrib/ folder, and it will build libMinizip.a
@@ -201,8 +201,8 @@ it in 'wizard' mode.
 
 I should note that you also need to have installed on your system:
 
-	zlib 	(1.2.8 tested)
-	lua	(5.2.2 tested)
+ - zlib (1.2.8 tested)
+ - lua	(5.2.2 tested)
 
 The libraries from these are linked-to at compile time.
 
