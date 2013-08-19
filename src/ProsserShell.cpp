@@ -1,0 +1,566 @@
+/* ProsserShell 
+ *
+ *	Prosser Shell
+ *
+ *	Scott Lawrence  yorgle@gmail.com
+ *
+ *	v1.0 2013-June-07 - Initial version
+ */
+
+/* This code is provided under an MIT license:
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Scott Lawrence
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
+
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <map>
+
+#include <stdlib.h>
+
+#include "StringUtils.h"
+#include "Utils.h"
+#include "ProsserShell.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+int luaSendCommand( lua_State *L )
+{
+	// SendCommand( 9, "foo" )
+	//           -2  -1
+        if (!lua_isstring( L, -1 )) {
+                fprintf( stderr, "SendCommand param 1 incorrect type\n");
+		lua_pop( L, 1 );
+                return 0;
+        }
+	std::string param( lua_tostring( L, -1 ));
+	lua_pop( L, 1 );
+
+        if (!lua_isnumber( L, -1 )) {
+                fprintf( stderr, "SendCommand param 0 incorrect type\n");
+		lua_pop( L, 1 );
+                return 0;
+        }
+        int key = lua_tointeger( L, -1 );
+	lua_pop( L, 1 );
+
+	ProsserShell::Shared()->SendCommand( key, param );
+	return 0;
+}
+
+
+void ProsserShell::SendCommand( int key, std::string param )
+{
+	switch( key ) {
+	case( kPSC_Warp ):
+		if( param.length() > 0 ) this->Cmd_Warp( param );
+		break;
+
+	case( kPSC_Save ):
+		this->Cmd_Save();
+		break;
+
+	case( kPSC_Load ):
+		this->Cmd_Load();
+		break;
+
+	case( kPSC_Null ):
+	default:
+		std::cout << "SendCommand DNF error" << std::endl;
+		break;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static ProsserShell * _shared = NULL;
+
+ProsserShell::ProsserShell( std::string argv0, bool isWizard )
+	: wizard( isWizard )
+	, loaded( false )
+	, age( 0 )
+	, lastLoaded( "" )
+{
+	if( !_shared ) {
+		_shared = this;
+	}
+
+	// okay. so the zip file parser will scan for PK\003\004,
+	// so we'll just try loading ourselves, in case the zip
+	// file is appended to us.
+
+	// I had some code in here to scan the file argv0 for the
+	// PK\003\004 block, but it found three of them. Which
+	// makes sense.  One in the zip library that it uses for
+	// comparison, one in this code, that *we* use for comparison,
+	// and the one on the end of the file.  I was going to
+	// change the code to search from the end of the file but
+	// then I noticed when I accidentally opened the .exe in
+	// 'vi', that vi decided that it was AOK to load it, but
+	// it complained about garbage on the beginning.  I figured
+	// "why not" and just tried loading our .exe as-is into
+	// the zip library, and lo-and-behold, it "just worked"(TM).
+	// So that's what this code does.
+
+	// It tries to load *us* as a zip file.  If it works,
+	// great.  we're done.  If not, load 'wad.zip' instead.
+
+	this->datafile = new BLUnZip( argv0 );
+
+	if( this->datafile->isValid() ) {
+		if( wizard ) std::cout << "Using .exe as the source zip!" << std::endl;
+	} else {
+		delete this->datafile;
+
+		this->datafile = new BLUnZip( "wad.zip" );
+		if( this->datafile->isValid() ) {
+			if( wizard ) std::cout << "Using wad.zip!" << std::endl;
+		}
+	}
+	this->lua = new BLua();
+
+	this->lua->RegisterFunction( "SendCommand", luaSendCommand );
+
+	if( !this->LoadLua( "startup-sequence" ) ) {
+		std::cout << "Unable to initialize system." << std::endl;
+		return;
+	}
+
+	std::cout << std::endl;
+
+	this->PrepCommands();
+}
+
+ProsserShell::~ProsserShell( void )
+{
+}
+
+ProsserShell * ProsserShell::Shared( void )
+{
+	return _shared;
+}
+
+
+void ProsserShell::PrepCommands( void )
+{
+	// commandList[ "word the user types" ] = "internal command handler";
+	// common commands
+	commandList[ "quit" ] = "quit";
+	helpList[ "quit" ] = "Quit.";
+	commandList[ "?" ] = "help";
+	commandList[ "help" ] = "help";
+	helpList[ "help" ] = "Display this help screen.";
+	commandList[ "look" ] = "look";
+	helpList[ "look" ] = "Look around the current room.";
+	commandList[ "move" ] = "move";
+	commandList[ "go" ] = "move";
+	helpList[ "move" ] = "Move/Go through one of the room's exits.";
+
+	commandList[ "wizard" ] = "wizard";
+	helpList[ "wizard" ] = "Toggle Wizard mode.";
+
+	commandList[ "save" ] = "save";
+	helpList[ "save" ] = "Save your progress";
+
+	commandList[ "load" ] = "load";
+	helpList[ "load" ] = "Restore from the last savegame";
+
+	// wizard commands
+	if( this->wizard ) {
+		commandList[ "vi" ] = "edit";
+		helpList[ "edit" ] = "(W) Edit the current room.";
+		commandList[ "lua" ] = "luarun";
+		helpList[ "lua" ] = "(W) Enter a LUA command.";
+		commandList[ "reload" ] = "reload";
+		helpList[ "reload" ] = "(W) Reload the current room.";
+		commandList[ "room" ] = "room";
+		helpList[ "room" ] = "(W) Display internals for the current room.";
+		commandList[ "warp" ] = "warp";
+		helpList[ "warp" ] = "(W) Warp to any room.";
+		commandList[ "ziplist" ] = "ziplist";
+		helpList[ "ziplist" ] = "(W) Warp to any room.";
+		commandList[ "new" ] = "new";
+		helpList[ "new" ] = "(W) Create a new room.";
+	}
+}
+
+////////////////////////////////////////
+
+std::string ProsserShell::ContentFromFileOrZip( std::string path )
+{
+	std::string newpath( "live/" );
+	newpath.append( path );
+	std::string content = StringUtils::FileToString( newpath );
+
+	if( content.length() > 0 ) {
+		// it was on the filesystem! use it
+		return content;
+	}
+
+	// nope. pull it out of the zip instead.
+	return datafile->ExtractToString( path );
+}
+
+////////////////////////////////////////
+std::string ProsserShell::RoomToFilename( std::string roomname )
+{
+	std::string str = "live/";
+        str.append( roomname );
+        str.append( ".lua" );
+	return str;
+}
+
+
+bool ProsserShell::LoadLua( std::string path )
+{
+	std::string ll( path );
+
+	path.append( ".lua" );
+	//std::string ltxt( datafile->ExtractToString( path ));
+	std::string ltxt( this->ContentFromFileOrZip( path ));
+
+	if( ltxt.size() > 0 ) {
+		// it was found. do something
+		if( loaded ) {
+			lua->CallFcn( "OnUnload" );
+		}
+
+		std::string cleanRoom( this->ContentFromFileOrZip( "cleanRoom.lua" ));
+		if( cleanRoom.size() > 0 ) {
+			lua->RunString( cleanRoom );
+		}
+
+		this->lastLoaded.assign( ll );
+		lua->RunString( ltxt );
+		loaded = true;
+		lua->CallFcn( "OnLoad" );
+	} else {
+		std::cout << path << ": Not found." << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+void ProsserShell::PrePrompt( void )
+{
+	lua->CallFcn( "Poll" );
+}
+
+
+std::string ProsserShell::GetPrompt( void )
+{
+	std::ostringstream ss;
+
+	if( this->wizard ) {
+		ss << "  " << this->lastLoaded;
+	}
+	ss << "  [" << this->age << "] >";
+	return ss.str();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+void ProsserShell::Cmd_Warp( std::string room )
+{
+	if( room.size() > 0 ) {
+		std::string tlast = this->lastLoaded;
+		bool success = this->LoadLua( room );
+		if( !success && this->wizard ) {
+			std::cout << room << ": Doesn't exist. Creating copy of " << tlast << "." << std::endl;
+			this->Cmd_New( room, tlast );
+			this->LoadLua( room );
+		}
+	}
+	else this->LoadLua( this->lastLoaded );
+
+	if( wizard ) {
+		std::cout << "+++ Lua Room is " << this->lastLoaded << ".lua" << std::endl;
+	}
+
+	this->Cmd_Look();
+}
+
+void ProsserShell::Cmd_Help( void )
+{
+	// this is a mess.
+	std::cout << "Commands:" << std::endl;
+
+	std::map<std::string, std::string>::iterator iter;
+	for (iter = commandList.begin(); iter != commandList.end(); ++iter) {
+		std::string cmdname( iter->second );
+		std::string helptext = helpList[ cmdname ];
+
+		bool isWizcmd = false;
+		if( helptext.size() > 3 ) {
+			isWizcmd = helptext[0]=='(' && helptext[1]=='W' && helptext[2]==')';
+		}
+
+		if( !isWizcmd || ( isWizcmd && wizard ))
+		{
+			printf( "     %8s - %s\n", cmdname.c_str(), helptext.c_str() );
+		}
+	}
+}
+
+
+void ProsserShell::Cmd_ZipList( void )
+{ 
+	if( !this->wizard ) return;
+
+	std::vector< std::string > lst;
+	datafile->ListOfItems( lst );
+	if( lst.size() == 0 ) {
+		std::cout << "No files in zip." << std::endl;
+	} else {
+		std::cout << "Listing:" << std::endl;
+		std::vector< std::string >::iterator it;
+		for( it = lst.begin() ; it != lst.end() ; it++ )
+		{
+			std::cout << "    " << *it << std::endl;
+		}
+	}
+}
+
+
+bool ProsserShell::Cmd_Move( std::string exitname, bool quiet )
+{
+	std::string newLuaName = "";
+
+	int i=1;
+	std::string name = lua->GetTableString( "exits", "name", i );
+	std::string alias = lua->GetTableString( "exits", "alias", i );
+	std::string luafile = lua->GetTableString( "exits", "lua", i );
+
+	while( name.length() > 0 ) {
+		if( StringUtils::SameStringCI( exitname, name )) newLuaName.assign( luafile );
+		if( StringUtils::SameStringCI( exitname, alias )) newLuaName.assign( luafile );
+
+		i++;
+		name = lua->GetTableString( "exits", "name", i );
+		alias = lua->GetTableString( "exits", "alias", i );
+		luafile = lua->GetTableString( "exits", "lua", i );
+	}
+
+	if( newLuaName.length() == 0 ) {
+
+		if( !quiet ) std::cout << exitname << ": Can't go that way!" << std::endl;
+		return false;
+	} else { 
+		std::cout << " new lua is " << newLuaName << std::endl;
+	}
+
+	Cmd_Warp( newLuaName );
+	return true;
+}
+
+void ProsserShell::Cmd_Look( void )
+{
+
+	std::string roomName = lua->GetTableString( "room", "name" );
+	if( roomName.length() > 0 ) {
+		std::cout << "========================================" << std::endl;
+		std::cout << "    " << roomName << std::endl;
+		std::cout << "========================================" << std::endl;
+	}
+
+	std::string roomDesc = lua->GetTableString( "room", "description" );
+	if( roomDesc.length() > 0 ) std::cout << roomDesc << std::endl;
+	lua->CallFcn( "RoomDescription" );
+
+	// debug text
+
+	std::cout << std::endl;
+	int i=1;
+	std::string name = lua->GetTableString( "exits", "name", i );
+
+	while( name.length() > 0 ) {
+		std::string exitdesc = lua->GetTableString( "exits", "description", i );
+		if( exitdesc.length() > 0 ) std::cout << exitdesc << std::endl;
+
+		i++;
+		name = lua->GetTableString( "exits", "name", i );
+	}
+}
+
+void ProsserShell::Cmd_Room( void )
+{
+	if( !this->wizard ) return;
+
+	int i=1;
+	std::cout << "Room file: " << this->lastLoaded  << std::endl;
+	std::string name = lua->GetTableString( "exits", "name", i );
+	while( name.length() > 0 ) {
+		std::string alias = lua->GetTableString( "exits", "alias", i );
+		std::string luafile = lua->GetTableString( "exits", "lua", i );
+
+		std::cout << "    " << name << " (" << alias << ")  -> " << luafile << ".lua" << std::endl;
+
+		i++;
+		name = lua->GetTableString( "exits", "name", i );
+	}
+
+	i = 1;
+	name = lua->GetTableString( "exits", "name", i );
+}
+
+
+void ProsserShell::Cmd_Save( void )
+{
+	std::ostringstream savetext;
+
+	savetext << "-- ProsserShell Save File" << std::endl;
+	savetext << std::endl;
+	savetext << lua->TableToString( "room" ) << std::endl;
+	savetext << std::endl;
+	std::cout << "Save content:" << std::endl << savetext.str();
+}
+
+void ProsserShell::Cmd_Load( void )
+{
+	std::cout << "should load here" << std::endl;
+}
+
+
+void ProsserShell::Cmd_LuaRun( std::vector<std::string> argv )
+{
+	if( !this->wizard ) return;
+
+	std::ostringstream s;
+	for( size_t i=1 ; i<argv.size() ; i++ ) {
+		if( i!= 1 ) s << " ";
+		s << argv[i];
+	}
+	
+	lua->RunString( s.str() );
+	lua->StackDump();
+	lua->StackClear(); // be sure.
+	//lua->Dump();
+}
+
+
+void ProsserShell::Cmd_New( std::string roomname, std::string copyFrom )
+{
+	if( !this->wizard ) return;
+
+	if( roomname.size() == 0 ) {
+		std::cout << "Specify a new room name" << std::endl;
+		return;
+	}
+
+	std::string toFile = this->RoomToFilename( roomname );
+	std::cout << "Synthesizing new room file: " << toFile << std::endl;
+	
+	if( Utils::FileExists( toFile )) {
+		std::cout << "Doing nothing. File exists already." << std::endl;
+	} else {
+		if( copyFrom.size() == 0 ) {
+			copyFrom.assign( "skeleton" );
+		}
+		copyFrom.assign( this->RoomToFilename( copyFrom ));
+		Utils::FileCopy( copyFrom, toFile );
+	}
+}
+
+void ProsserShell::Cmd_Edit( void )
+{
+	if( !this->wizard ) return;
+
+	std::string cmd( "vi " );
+	cmd.append( this->RoomToFilename( this->lastLoaded ));
+	system( cmd.c_str() );
+}
+
+void ProsserShell::Cmd_Wizard( void )
+{
+	this->wizard = !this->wizard;
+
+	std::cout << "Wizard mode: " << (this->wizard?"Enabled":"Disabled") << "." << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool ProsserShell::HandleLine( std::vector<std::string> argv )
+{
+	// no content.. just continue
+	if( argv.size() < 1 ) return true;
+	
+	std::string tc = "";
+
+	if( commandList.find( argv[0] ) == commandList.end() )
+	{
+		// not in the command list.  check the exits:
+		//if( !this->Cmd_Move( argv[0], false )) {
+			std::cout << argv[0] << ": What?" << std::endl;
+			return true;
+		//}
+	}
+
+	age++;
+
+	////////////////////////////////////////
+	tc.assign( commandList[ argv[0] ] );
+
+	if( !tc.compare( "quit" )) return false;
+
+	if( !tc.compare( "warp" ) && this->wizard ) {
+		if( argv.size() == 2 ) 
+			this->Cmd_Warp( argv[1] );
+		else 
+			tc.assign( "ziplist" );
+	}
+
+	if( !tc.compare( "help" )) this->Cmd_Help(); 
+	
+	if( !tc.compare( "ziplist" ) && this->wizard ) this->Cmd_ZipList();
+	
+
+	if( !tc.compare( "move" )) this->Cmd_Move( argv[1] );
+
+	if( !tc.compare( "look" )) this->Cmd_Look();
+
+	if( !tc.compare( "room" ) && this->wizard ) this->Cmd_Room();
+
+	if( !tc.compare( "luarun" ) && this->wizard ) this->Cmd_LuaRun( argv );
+
+	if( !tc.compare( "new" ) && this->wizard ) {
+		if( argv.size() != 2 )  this->Cmd_New( "" );
+		else                    this->Cmd_New( argv[1] );
+	}
+
+	if( !tc.compare( "edit" ) && this->wizard ) {
+		this->Cmd_Edit();
+		tc.assign( "reload" );
+	}
+
+	if( !tc.compare( "reload" ) && this->wizard ) this->Cmd_Warp( "" );
+
+	if( !tc.compare( "wizard" ) ) this->Cmd_Wizard();
+
+	return true;
+}

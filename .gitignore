@@ -11,3 +11,33 @@
 *.lai
 *.la
 *.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# temp files
+*.swp
+*~
+
+saved/
+
+.DS_Store
+prosser
+prosser.exe
+contrib/BLUnZip.cpp
+contrib/BLUnZip.h
+contrib/BLZip.cpp
+contrib/BLZip.h
+
+
+wad.zip
+
+live
