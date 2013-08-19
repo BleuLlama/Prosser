@@ -28,3 +28,8 @@ function OnPoll()
 end
 
 function RoomDescription() end
+
+function OnTyped( c, p )
+    return kOT_Unused
+end
+

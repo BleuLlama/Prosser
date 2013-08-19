@@ -75,6 +75,11 @@ public:
 	#define kPSC_Load	(3)
 	void SendCommand( int key, std::string value );
 
+public:
+	#define kOT_Unused	(0)
+	#define kOT_Used	(1)
+	#define kOT_Veto	(2)
+
 private:
 	void PrepCommands( void );
 

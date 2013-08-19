@@ -10,6 +10,11 @@ kPSC_Warp = 1
 kPSC_Save = 2
 kPSC_Load = 3
 
+-- for the OnTyped function to return. 
+kOT_Unused = 0
+kOT_Used = 1
+kOT_Veto = 2
+
 -- this gets run when the system starts up.
 -- game load should be in here.
 

@@ -97,6 +97,44 @@ function is called, then the other lua room is loaded immediately
 
 If something goes horribly wrong, then "crash.lua" is run.
 
+When the user types something in, it is first passed to the "OnTyped()" function.
+The OnTyped function has two parameters, consisting of the first two words
+that the user typed.  For example if they typed:
+
+    Move East Now
+
+Then this will be called to the Lua script as though the function call were:
+
+    OnTyped( "Move", "East" )
+
+The OnTyped function can return one of three values.
+
+    kOT_Unused	- the Lua side ignored this command
+    kOT_Used    - the Lua side used this command
+    kOT_Veto    - the Lua side vetoes its use in the interpreter.
+
+The "Veto" option means that if the OnTyped function sees any "Move"
+command, it can make sure that the main interpreter blocks use of
+this function.  For example, here is a block of code that will
+inhibit passage to an exit until the user tries to move there three
+times:
+
+    moves = 0
+    function OnTyped( cmd, param )
+
+	if( command == "move" and param == "North" )
+	    moves = moves +1
+
+	    if( moves >2 ) then
+		return kOT_Unused
+	    end
+
+	    print "You push on the door, but it does not move."
+	    return kOT_Veto
+
+	return kOT_Unused
+    end
+
 
 # Room reference guide
 
@@ -108,6 +146,7 @@ Here is a list of functions in a room that are called by the interpreter:
  - OnUnload()	- once, when the file is unloaded / player leaves
  - RoomDescription() - when the user types "look"
  - Poll()		- just before the command prompt is printed out
+ - Typed() 	- the user typed this. See above for more info
 
 Here is a list of expected structures in a room
 
@@ -147,6 +186,7 @@ Here is an example of a room.
     function OnUnload() end
     function Poll() end
     function RoomDescription() end
+    function OnTyped() return kOTUnused end
 
 
 Since Lua is dynamic, you can actively change things each time the
