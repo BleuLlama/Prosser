@@ -93,7 +93,8 @@ public:
 	void Cmd_Room( void );
 	void Cmd_LuaRun( std::vector<std::string> argv );
 	void Cmd_New( std::string roomname, std::string copyFrom="" );
-	void Cmd_Edit( void );
+	void Cmd_NewItem( std::string itemname );
+	void Cmd_Edit( std::string param="" );
 	void Cmd_Wizard( void );
 
 	void Cmd_Save( void );

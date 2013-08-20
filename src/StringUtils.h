@@ -46,6 +46,7 @@ public:
 
 public:
 	static std::string FileToString( std::string path );
+	static void StringToFile( std::string content, std::string file );
 
 public:
 	static bool SameStringCI( std::string str0, std::string str1 );

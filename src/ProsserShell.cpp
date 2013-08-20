@@ -45,6 +45,9 @@ THE SOFTWARE.
 #include "Utils.h"
 #include "ProsserShell.h"
 
+#define kLiveDir   "live/"
+#define kEditor    "vi"
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -192,6 +195,7 @@ void ProsserShell::PrepCommands( void )
 	// wizard commands
 	if( this->wizard ) {
 		commandList[ "vi" ] = "edit";
+		commandList[ "edit" ] = "edit";
 		helpList[ "edit" ] = "(W) Edit the current room.";
 		commandList[ "lua" ] = "luarun";
 		helpList[ "lua" ] = "(W) Enter a LUA command.";
@@ -205,14 +209,18 @@ void ProsserShell::PrepCommands( void )
 		helpList[ "ziplist" ] = "(W) Warp to any room.";
 		commandList[ "new" ] = "new";
 		helpList[ "new" ] = "(W) Create a new room.";
+
+		commandList[ "newitem" ] = "newitem";
+		helpList[ "newitem" ] = "(W) Create a new item.";
 	}
 }
 
 ////////////////////////////////////////
 
+
 std::string ProsserShell::ContentFromFileOrZip( std::string path )
 {
-	std::string newpath( "live/" );
+	std::string newpath( kLiveDir );
 	newpath.append( path );
 	std::string content = StringUtils::FileToString( newpath );
 
@@ -228,7 +236,7 @@ std::string ProsserShell::ContentFromFileOrZip( std::string path )
 ////////////////////////////////////////
 std::string ProsserShell::RoomToFilename( std::string roomname )
 {
-	std::string str = "live/";
+	std::string str( kLiveDir );
         str.append( roomname );
         str.append( ".lua" );
 	return str;
@@ -483,16 +491,91 @@ void ProsserShell::Cmd_New( std::string roomname, std::string copyFrom )
 			copyFrom.assign( "skeleton" );
 		}
 		copyFrom.assign( this->RoomToFilename( copyFrom ));
-		Utils::FileCopy( copyFrom, toFile );
+
+		std::string ltxt( this->ContentFromFileOrZip( "skeleton.lua" ));
+		StringUtils::StringToFile( ltxt, toFile );
 	}
 }
 
-void ProsserShell::Cmd_Edit( void )
+
+void ProsserShell::Cmd_NewItem( std::string itemname )
 {
 	if( !this->wizard ) return;
 
-	std::string cmd( "vi " );
-	cmd.append( this->RoomToFilename( this->lastLoaded ));
+	if( itemname.size() == 0 ) {
+		std::cout << "Specify a new item name" << std::endl;
+		return;
+	}
+
+	std::string toFile = this->RoomToFilename( itemname );
+	std::cout << "Synthesizing new item file: " << toFile << std::endl;
+	
+	if( Utils::FileExists( toFile )) {
+		std::cout << "Doing nothing. File exists already." << std::endl;
+	} else {
+		std::string ltxt( this->ContentFromFileOrZip( "itemskeleton.lua" ));
+		StringUtils::StringToFile( ltxt, toFile );
+	}
+}
+
+void ProsserShell::Cmd_Edit( std::string param )
+{
+	std::string filepath( kLiveDir );
+	if( !this->wizard ) return;
+
+	// let's build the commadn editor string.
+	std::string cmd( kEditor );
+	cmd.append( " " );
+
+	// first, let's make sure the "live" directory exists.
+	Utils::MakeDir( kLiveDir );
+
+	// Okay... we can have a few options here.  
+
+	// If param is "", then we load  the last loaded
+	if( StringUtils::SameStringCI( param, "" )) {
+
+		// some special stuff in here.
+		// we're working with the currently-loaded room, so we will
+		// make sure that the live/ version exists.
+		// if it doesn't, we synthesize it appropriately.
+
+		filepath = this->RoomToFilename( this->lastLoaded );
+
+		if( !Utils::FileExists( filepath )) {
+			// synthesize last loaded so we have something to edit
+			std::string ltxt( this->ContentFromFileOrZip( this->lastLoaded ));
+
+			if( ltxt.length() == 0 ){
+				std::string ll( this->lastLoaded );
+				ll.append( ".lua" );
+				ltxt.assign( this->ContentFromFileOrZip( ll ));
+			}
+
+			StringUtils::StringToFile( ltxt, filepath );
+		}
+		
+		cmd.append( this->RoomToFilename( this->lastLoaded ));
+	} else {
+		filepath.append( param );
+
+		// (live/)param(.lua)
+		if( !Utils::FileExists( filepath )) {
+			filepath.append( ".lua" );
+			// (live/)param.lua
+		}
+
+		if( !Utils::FileExists( filepath )) {
+			std::cout << "!!!!!!!!!!!!" << std::endl;
+			std::cout << param << ": Doesn't exist." << std::endl;
+			std::cout << "!!!!!!!!!!!!" << std::endl;
+			std::cout << std::endl;
+			return;
+		}
+
+		cmd.append( filepath );
+	}
+
 	system( cmd.c_str() );
 }
 
@@ -526,41 +609,53 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	////////////////////////////////////////
 	tc.assign( commandList[ argv[0] ] );
 
-	if( !tc.compare( "quit" )) return false;
+	if(  StringUtils::SameStringCI( tc, "quit" )) return false;
 
-	if( !tc.compare( "warp" ) && this->wizard ) {
+	if(  StringUtils::SameStringCI( tc, "warp" ) && this->wizard ) {
 		if( argv.size() == 2 ) 
 			this->Cmd_Warp( argv[1] );
 		else 
 			tc.assign( "ziplist" );
 	}
 
-	if( !tc.compare( "help" )) this->Cmd_Help(); 
+	if(  StringUtils::SameStringCI( tc, "help" )) this->Cmd_Help(); 
 	
-	if( !tc.compare( "ziplist" ) && this->wizard ) this->Cmd_ZipList();
+	if(  StringUtils::SameStringCI( tc, "ziplist" ) && this->wizard ) this->Cmd_ZipList();
 	
 
-	if( !tc.compare( "move" )) this->Cmd_Move( argv[1] );
+	if(  StringUtils::SameStringCI( tc, "move" )) this->Cmd_Move( argv[1] );
 
-	if( !tc.compare( "look" )) this->Cmd_Look();
+	if(  StringUtils::SameStringCI( tc, "look" )) this->Cmd_Look();
 
-	if( !tc.compare( "room" ) && this->wizard ) this->Cmd_Room();
+	if(  StringUtils::SameStringCI( tc, "room" ) && this->wizard ) this->Cmd_Room();
 
-	if( !tc.compare( "luarun" ) && this->wizard ) this->Cmd_LuaRun( argv );
+	if(  StringUtils::SameStringCI( tc, "luarun" ) && this->wizard ) this->Cmd_LuaRun( argv );
 
-	if( !tc.compare( "new" ) && this->wizard ) {
+	if(  StringUtils::SameStringCI( tc, "new" ) && this->wizard ) {
 		if( argv.size() != 2 )  this->Cmd_New( "" );
 		else                    this->Cmd_New( argv[1] );
 	}
 
-	if( !tc.compare( "edit" ) && this->wizard ) {
-		this->Cmd_Edit();
+	if(  StringUtils::SameStringCI( tc, "newitem" ) && this->wizard ) {
+		if( argv.size() != 2 ) {
+			std::cout << "item name?" << std::endl;
+		} else {
+			this->Cmd_NewItem( argv[1] );
+		}
+	}
+
+	if(  StringUtils::SameStringCI( tc, "edit" ) && this->wizard ) {
+		if( argv.size() > 1 ) {
+			this->Cmd_Edit( argv[1] );
+		} else {
+			this->Cmd_Edit();
+		}
 		tc.assign( "reload" );
 	}
 
-	if( !tc.compare( "reload" ) && this->wizard ) this->Cmd_Warp( "" );
+	if(  StringUtils::SameStringCI( tc, "reload" ) && this->wizard ) this->Cmd_Warp( "" );
 
-	if( !tc.compare( "wizard" ) ) this->Cmd_Wizard();
+	if(  StringUtils::SameStringCI( tc, "wizard" ) ) this->Cmd_Wizard();
 
 	return true;
 }

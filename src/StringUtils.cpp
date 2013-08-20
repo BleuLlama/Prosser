@@ -68,6 +68,16 @@ std::string StringUtils::FileToString( std::string path )
     return(content);
 }
 
+
+void StringUtils::StringToFile( std::string content, std::string path )
+{
+	std::ofstream f;
+
+	f.open( path.c_str() );
+	f << content;
+	f.close();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool StringUtils::SameStringCI( std::string str1, std::string str2 )
