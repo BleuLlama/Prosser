@@ -44,11 +44,19 @@ THE SOFTWARE.
 #include "BLZip.h"
 #include "BLua.h"
 
+
+////////////////////////////////////////////////////////////////////////////////
+
+#define kVersionString "v008 2013-Aug-20"
+
+// v008  2013-Aug-20	Rooms, editing, preliminary items
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class ProsserShell: public Shell
 {
 private:
+	std::string version;
 	BLua * lua;
 	BLUnZip * datafile;
 	bool wizard;

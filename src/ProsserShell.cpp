@@ -103,7 +103,8 @@ void ProsserShell::SendCommand( int key, std::string param )
 static ProsserShell * _shared = NULL;
 
 ProsserShell::ProsserShell( std::string argv0, bool isWizard )
-	: wizard( isWizard )
+	: version( kVersionString )
+	, wizard( isWizard )
 	, loaded( false )
 	, age( 0 )
 	, lastLoaded( "" )
@@ -111,6 +112,9 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 	if( !_shared ) {
 		_shared = this;
 	}
+
+	std::cout << "Prosser Interpreter " << version << std::endl;
+	std::cout << std::endl;
 
 	// okay. so the zip file parser will scan for PK\003\004,
 	// so we'll just try loading ourselves, in case the zip
@@ -197,7 +201,7 @@ void ProsserShell::PrepCommands( void )
 		commandList[ "vi" ] = "edit";
 		commandList[ "edit" ] = "edit";
 		helpList[ "edit" ] = "(W) Edit the current room.";
-		commandList[ "lua" ] = "luarun";
+		commandList[ "lua" ] = "lua";
 		helpList[ "lua" ] = "(W) Enter a LUA command.";
 		commandList[ "reload" ] = "reload";
 		helpList[ "reload" ] = "(W) Reload the current room.";

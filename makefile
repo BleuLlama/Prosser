@@ -46,9 +46,11 @@ all: $(TARGA)
 	@echo $(CXX) $<
 	@$(CXX) $(CFLAGS) $(DEFS) $(INCS) -c -o $@ $<
 
-$(TARGA): $(OBJSA) $(WADA)
+$(TARGA): $(OBJSA)
 	@echo Link $@
 	@$(CXX) $(CFLAGS) $(OBJSA) $(LDFLAGS) $(LIBS) -o $@
+
+dist: $(TARGA) $(WADA)
 	@echo appending WAD ZIP file to EXE
 	@cat $(WADA) >> $(TARGA)
 	@rm $(WADA)
@@ -73,7 +75,7 @@ kickstart:
 	-cd contrib ; make
 .PHONY: kickstart
 
-testa: $(TARGA)
+testa: dist
 	./$(TARGA) -wizard
 .PHONY: testa
 
