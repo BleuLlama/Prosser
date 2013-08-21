@@ -135,6 +135,34 @@ times:
 	return kOT_Unused
     end
 
+## Wizard mode
+
+You can enter "wizard mode" by using the "-wizard" option on the command
+line. This enables a few things:
+ - Editing
+ - Autocreation of rooms
+ - more detailed descriptions of filenames, etc
+
+So for example, you type "edit" and it brings the current room into
+vi.  From here, you can edit it.  When you save and quit, the room
+is automatically reloaded (warped-to).
+
+You can also type "edit <roomname>" to edit a specific other room.
+
+To create a new room, you simply type "new <roomname>".  You can
+also just add the room exit in your current room, save-quit, then
+move to that new exit.  The "skeleton.lua" file will be copied to
+the new "<roomname>.lua" file.  You can then edit it as above.
+
+For items, the command is "newitem <itemname>".  Note that roomname
+and itemnames are unique.  You can't have two rooms named "foo" or
+a room and an item named "foo".
+
+Note that the editor is not configurable currently, but can be
+changed in the source.
+
+Other Wizard options can be found by typing "help".  The Wizard
+commands have a "(W)" in their description.
 
 # Room reference guide
 
@@ -208,6 +236,7 @@ Once it becomes greater than 3, then the description will change
 to "Bedroom" as you see there.
 
 
+
 # Building The Interpreter
 
 There are some bits of code you will need to install to get this
@@ -221,11 +250,12 @@ to work:
   - The base source tree from zlib contains a few files that are used
     to build the zip library.  
 
-In the contrib/makefile folder, set the two variables to point to
-these directories:
+ - Lua 5.2.2
+  - BLua wrapper needs to link against this, and it uses some
+    headers from it.
 
-    BLZIP_DIR := /Users/sdl/src/git/BLZip
-    ZLIB_DIR := /Users/sdl/src/notme/zlib-1.2.8
+In the makfile you may need to adjust paths to BLZip and zlib-1.2.8
+If you put them next to the "Prosser" folder than you should be fine.
 
 Once you have this all set up, you should be able to just type
 'make' in the contrib/ folder, and it will build libMinizip.a
@@ -233,10 +263,10 @@ Once you have this all set up, you should be able to just type
 This zip library is used to access the zip file which contains all
 of the game data.
 
-Next, go to the main directory and type 'make' and it should build
-the prosser executable.  If you type "make test", it will build the
-executable, zip up the contents of the 'data' folder, and then run
-it in 'wizard' mode.
+Next, go back to the main directory and type 'make' and it should
+build the prosser executable.  If you type "make test", it will
+build the executable, zip up the contents of the 'data' folder, and
+then run it in 'wizard' mode.
 
 
 I should note that you also need to have installed on your system:
@@ -247,6 +277,35 @@ I should note that you also need to have installed on your system:
 The libraries from these are linked-to at compile time.
 
 And obviously, you will need C++, and all of that falderal.
+
+## details
+
+Some details about building this stuff...
+
+First of all, grab the zlib-1.2.8 source:
+
+        curl -O http://zlib.net/zlib-1.2.8.tar.gz
+	gzip -cd zlib-1.2.8.tar.gz | tar -xvf -
+	cd zlib-1.2.8
+	./configure
+	make
+	sudo make install
+
+And Lua:
+
+	curl -R -O http://www.lua.org/ftp/lua-5.2.2.tar.gz
+	tar zxf lua-5.2.2.tar.gz
+	cd lua-5.2.2
+	make
+	mkdir ~/sw
+	edit the Makefile, and change:
+		INSTALL_TOP= /home/pi/sw
+	make install
+
+On some systems, like raspberry pi, you may need to also install 'zip'.
+
+	sudo apt-get install zip
+
 
 
 # todo items

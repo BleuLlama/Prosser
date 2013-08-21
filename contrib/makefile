@@ -1,6 +1,8 @@
+# as with the directory one up, BLZip, and zlib need to exist on
+# your machine to build this
 
-BLZIP_DIR := /Users/sdl/src/git/BLZip
-ZLIB_DIR := /Users/sdl/src/notme/zlib-1.2.8
+BLZIP_DIR := ../../BLZip
+ZLIB_DIR := ../../zlib-1.2.8
 MINIZIP_DIR :=  $(ZLIB_DIR)/contrib/minizip
 
 
@@ -31,8 +33,8 @@ libMinizip.a: $(MINIZIP_OBJS)
 	ranlib $@	
 
 clean:
-	rm libMinizip.a
-	rm BLZip.h BLZip.cpp BLUnZip.h BLUnZip.cpp
+	-rm libMinizip.a
+	-rm BLZip.h BLZip.cpp BLUnZip.h BLUnZip.cpp
 
 ################################################################################
 

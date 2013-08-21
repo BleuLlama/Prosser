@@ -39,6 +39,7 @@ THE SOFTWARE.
 #include <vector>
 #include <fstream>
 #include <string>
+#include <algorithm>
 #include <cerrno>
 
 

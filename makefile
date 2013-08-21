@@ -1,9 +1,25 @@
-# Makefile for msf-dump
+# Makefile for prosser
 #
-BLZIP_DIR := /Users/sdl/src/git/BLZip
-ZLIB_DIR := /Users/sdl/src/notme/zlib-1.2.8
+
+# there are a few dependancies.. 
+
+# BLZip needs to be retrieved from github (minizip wrapper)
+#	https://github.com/BleuLlama/BLZip
+BLZIP_DIR := ../BLZip
+
+# ZLib sources (v1.2.8 tested) must also be retrieved and extracted
+#	http://www.zlib.net/
+ZLIB_DIR := ../zlib-1.2.8
+
+
+# lua 5.2.2 needs to be installed somewhere.  I installed it to 
+# a directory  in my home called 'sw'. 
+#	http://www.lua.org/
+
+LUA_DIR := $(HOME)/sw
+
+
 MINIZIP_DIR :=  $(ZLIB_DIR)/contrib/minizip
-LUA_DIR := /Users/sdl/sw
 
 TARGA := prosser
 
@@ -12,6 +28,7 @@ SRCSCOMMON := \
 	contrib/BLUnZip.cpp
 
 INCS += -Icontrib/ \
+	-I/usr/include/ \
 	-I$(ZLIB_DIR) \
 	-I$(MINIZIP_DIR) \
 	-I$(LUA_DIR)/include/
@@ -36,7 +53,7 @@ CFLAGS += -g
 xx += -Wall -pedantic
 
 LDFLAGS += -Lcontrib -L$(LUA_DIR)/lib/
-LIBS += -lMinizip -lz -llua
+LIBS += -lMinizip -lz -llua -ldl
 
 ################################################################################
 
