@@ -55,8 +55,22 @@ xx += -Wall -pedantic
 LDFLAGS += -Lcontrib -L$(LUA_DIR)/lib/
 LIBS += -lMinizip -lz -llua
 
+################################################################################
+
+export ARCH := $(shell uname)
+
+#commonize these
+ifeq ($(ARCH),MINGW32_NT-6.1)
+export ARCH := MINGW32
+endif
+ifeq ($(ARCH),MINGW32_NT-5.2)
+export ARCH := MINGW32
+endif
+
 # for NON windows
+ifneq ($(ARCH),MINGW32)
 LIBS += -ldl
+endif
 
 ################################################################################
 

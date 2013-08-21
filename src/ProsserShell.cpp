@@ -113,7 +113,7 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 		_shared = this;
 	}
 
-	std::cout << "Prosser Interpreter " << version << std::endl;
+	std::cout << "Prosser SUD " << version << std::endl;
 	std::cout << std::endl;
 
 	// okay. so the zip file parser will scan for PK\003\004,
@@ -139,13 +139,13 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 	this->datafile = new BLUnZip( argv0 );
 
 	if( this->datafile->isValid() ) {
-		if( wizard ) std::cout << "Using .exe as the source zip!" << std::endl;
+		if( wizard ) std::cout << "W: Using .exe as the source zip!" << std::endl;
 	} else {
 		delete this->datafile;
 
 		this->datafile = new BLUnZip( "wad.zip" );
 		if( this->datafile->isValid() ) {
-			if( wizard ) std::cout << "Using wad.zip!" << std::endl;
+			if( wizard ) std::cout << "W: Using wad.zip!" << std::endl;
 		}
 	}
 	this->lua = new BLua();
@@ -291,7 +291,7 @@ std::string ProsserShell::GetPrompt( void )
 	std::ostringstream ss;
 
 	if( this->wizard ) {
-		ss << "  " << this->lastLoaded;
+		ss << " (W)  " << this->lastLoaded;
 	}
 	ss << "  [" << this->age << "] >";
 	return ss.str();
@@ -306,7 +306,9 @@ void ProsserShell::Cmd_Warp( std::string room )
 		std::string tlast = this->lastLoaded;
 		bool success = this->LoadLua( room );
 		if( !success && this->wizard ) {
-			std::cout << room << ": Doesn't exist. Creating copy of " << tlast << "." << std::endl;
+			std::cout << "W: " << room
+			<< ": Doesn't exist. Creating copy of " 
+			<< tlast << "." << std::endl;
 			this->Cmd_New( room, tlast );
 			this->LoadLua( room );
 		}
@@ -314,7 +316,7 @@ void ProsserShell::Cmd_Warp( std::string room )
 	else this->LoadLua( this->lastLoaded );
 
 	if( wizard ) {
-		std::cout << "+++ Lua Room is " << this->lastLoaded << ".lua" << std::endl;
+		std::cout << "W: +++ Lua Room is " << this->lastLoaded << ".lua" << std::endl;
 	}
 
 	this->Cmd_Look();
@@ -350,9 +352,9 @@ void ProsserShell::Cmd_ListZip( void )
 	std::vector< std::string > lst;
 	datafile->ListOfItems( lst );
 	if( lst.size() == 0 ) {
-		std::cout << "No files in zip." << std::endl;
+		std::cout << "W: No files in zip." << std::endl;
 	} else {
-		std::cout << "Zip Listing:" << std::endl;
+		std::cout << "W: Zip Listing:" << std::endl;
 		std::vector< std::string >::iterator it;
 		for( it = lst.begin() ; it != lst.end() ; it++ )
 		{
@@ -369,7 +371,7 @@ void ProsserShell::Cmd_ListLive( void )
 	std::string livedir( kLiveDir );
 
 	if( !Utils::DirectoryExists( livedir )) {
-		std::cout << "No 'live' directory." << std::endl;
+		std::cout << "W: No 'live' directory." << std::endl;
 		return;
 	}
 
@@ -377,9 +379,9 @@ void ProsserShell::Cmd_ListLive( void )
 	Utils::DirectoryListing( livedir, lst );
 
 	if( lst.size() == 0 ) {
-		std::cout << "No files in directory." << std::endl;
+		std::cout << "W: No files in directory." << std::endl;
 	} else {
-		std::cout << "Live Listing:" << std::endl;
+		std::cout << "W: Live Listing:" << std::endl;
 		std::vector< std::string >::iterator it;
 		for( it = lst.begin() ; it != lst.end() ; it++ )
 		{
@@ -413,7 +415,7 @@ bool ProsserShell::Cmd_Move( std::string exitname, bool quiet )
 		if( !quiet ) std::cout << exitname << ": Can't go that way!" << std::endl;
 		return false;
 	} else { 
-		std::cout << " new lua is " << newLuaName << std::endl;
+		//std::cout << " new lua is " << newLuaName << std::endl;
 	}
 
 	Cmd_Warp( newLuaName );
@@ -454,7 +456,7 @@ void ProsserShell::Cmd_Room( void )
 	if( !this->wizard ) return;
 
 	int i=1;
-	std::cout << "Room file: " << this->lastLoaded  << std::endl;
+	std::cout << "W: Room file: " << this->lastLoaded  << std::endl;
 	std::string name = lua->GetTableString( "exits", "name", i );
 	while( name.length() > 0 ) {
 		std::string alias = lua->GetTableString( "exits", "alias", i );
@@ -510,15 +512,15 @@ void ProsserShell::Cmd_New( std::string roomname, std::string copyFrom )
 	if( !this->wizard ) return;
 
 	if( roomname.size() == 0 ) {
-		std::cout << "Specify a new room name" << std::endl;
+		std::cout << "W: Specify a new room name" << std::endl;
 		return;
 	}
 
 	std::string toFile = this->RoomToFilename( roomname );
-	std::cout << "Synthesizing new room file: " << toFile << std::endl;
+	std::cout << "W: Synthesizing new room file: " << toFile << std::endl;
 	
 	if( Utils::FileExists( toFile )) {
-		std::cout << "Doing nothing. File exists already." << std::endl;
+		std::cout << "W: Doing nothing. File exists already." << std::endl;
 	} else {
 		if( copyFrom.size() == 0 ) {
 			copyFrom.assign( "skeleton" );
@@ -536,15 +538,15 @@ void ProsserShell::Cmd_NewItem( std::string itemname )
 	if( !this->wizard ) return;
 
 	if( itemname.size() == 0 ) {
-		std::cout << "Specify a new item name" << std::endl;
+		std::cout << "W: Specify a new item name" << std::endl;
 		return;
 	}
 
 	std::string toFile = this->RoomToFilename( itemname );
-	std::cout << "Synthesizing new item file: " << toFile << std::endl;
+	std::cout << "W: Synthesizing new item file: " << toFile << std::endl;
 	
 	if( Utils::FileExists( toFile )) {
-		std::cout << "Doing nothing. File exists already." << std::endl;
+		std::cout << "W: Doing nothing. File exists already." << std::endl;
 	} else {
 		std::string ltxt( this->ContentFromFileOrZip( "itemskeleton.lua" ));
 		StringUtils::StringToFile( ltxt, toFile );
@@ -616,7 +618,7 @@ void ProsserShell::Cmd_Wizard( void )
 {
 	this->wizard = !this->wizard;
 
-	std::cout << "Wizard mode: " << (this->wizard?"Enabled":"Disabled") << "." << std::endl;
+	std::cout << "W: Wizard mode: " << (this->wizard?"Enabled":"Disabled") << "." << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

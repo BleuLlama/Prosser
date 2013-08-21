@@ -315,3 +315,4 @@ On some systems, like raspberry pi, you may need to also install 'zip'.
   - returns 1 if it used it (it was valid)
   - returns 0 if it was unknown.
   - eg  "smell", "listen" etc.
+ - use the exit names for navigation without "move"
