@@ -94,7 +94,8 @@ private:
 public:
 	void Cmd_Warp( std::string room );
 	void Cmd_Help( void );
-	void Cmd_ZipList( void );
+	void Cmd_ListZip( void );
+	void Cmd_ListLive( void );
 	bool Cmd_Move( std::string exitname, bool quiet = false );
 		// that returns TRUE if it found and did the move command
 	void Cmd_Look( void );

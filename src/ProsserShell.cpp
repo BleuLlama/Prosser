@@ -209,8 +209,10 @@ void ProsserShell::PrepCommands( void )
 		helpList[ "room" ] = "(W) Display internals for the current room.";
 		commandList[ "warp" ] = "warp";
 		helpList[ "warp" ] = "(W) Warp to any room.";
-		commandList[ "ziplist" ] = "ziplist";
-		helpList[ "ziplist" ] = "(W) Warp to any room.";
+		commandList[ "listzip" ] = "listzip";
+		helpList[ "listzip" ] = "(W) Show contents of zip file.";
+		commandList[ "listlive" ] = "listlive";
+		helpList[ "listlive" ] = "(W) Show contents of live dir.";
 		commandList[ "new" ] = "new";
 		helpList[ "new" ] = "(W) Create a new room.";
 
@@ -341,7 +343,7 @@ void ProsserShell::Cmd_Help( void )
 }
 
 
-void ProsserShell::Cmd_ZipList( void )
+void ProsserShell::Cmd_ListZip( void )
 { 
 	if( !this->wizard ) return;
 
@@ -350,7 +352,34 @@ void ProsserShell::Cmd_ZipList( void )
 	if( lst.size() == 0 ) {
 		std::cout << "No files in zip." << std::endl;
 	} else {
-		std::cout << "Listing:" << std::endl;
+		std::cout << "Zip Listing:" << std::endl;
+		std::vector< std::string >::iterator it;
+		for( it = lst.begin() ; it != lst.end() ; it++ )
+		{
+			std::cout << "    " << *it << std::endl;
+		}
+	}
+}
+
+
+void ProsserShell::Cmd_ListLive( void )
+{ 
+	if( !this->wizard ) return;
+
+	std::string livedir( kLiveDir );
+
+	if( !Utils::DirectoryExists( livedir )) {
+		std::cout << "No 'live' directory." << std::endl;
+		return;
+	}
+
+	std::vector< std::string > lst;
+	Utils::DirectoryListing( livedir, lst );
+
+	if( lst.size() == 0 ) {
+		std::cout << "No files in directory." << std::endl;
+	} else {
+		std::cout << "Live Listing:" << std::endl;
 		std::vector< std::string >::iterator it;
 		for( it = lst.begin() ; it != lst.end() ; it++ )
 		{
@@ -619,12 +648,13 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		if( argv.size() == 2 ) 
 			this->Cmd_Warp( argv[1] );
 		else 
-			tc.assign( "ziplist" );
+			tc.assign( "listzip" );
 	}
 
 	if(  StringUtils::SameStringCI( tc, "help" )) this->Cmd_Help(); 
 	
-	if(  StringUtils::SameStringCI( tc, "ziplist" ) && this->wizard ) this->Cmd_ZipList();
+	if(  StringUtils::SameStringCI( tc, "listzip" ) && this->wizard ) this->Cmd_ListZip();
+	if(  StringUtils::SameStringCI( tc, "listlive" ) && this->wizard ) this->Cmd_ListLive();
 	
 
 	if(  StringUtils::SameStringCI( tc, "move" )) this->Cmd_Move( argv[1] );

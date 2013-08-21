@@ -50,6 +50,7 @@ Shell::~Shell( void )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// handle a line of arg items
 bool Shell::HandleLine( std::vector<std::string> argv )
 {
 	StringUtils::ArgvDump( argv );
@@ -63,6 +64,8 @@ bool Shell::HandleLine( std::vector<std::string> argv )
 	return true;
 }
 
+// HandleString is mainly for injection.
+// take a string. split it, send it to HandleLine()
 bool Shell::HandleString( std::string line )
 {
 	std::vector<std::string> tokens;
@@ -88,12 +91,23 @@ void Shell::Go( void )
 	std::vector<std::string> tokens;
 
 	do {
+		// before we draw a prompt, pre-prompt-poll
 		this->PrePrompt();
+
+		// if there was stuff on the previous line
+		// add an extra newline.
+		// (user hits return a lot, it doesn't look stupid)
 		if( hadStuff ) std::cout << std::endl;
 		hadStuff = false;
+
+		// draw the prompt
 		std::cout << GetPrompt() << " " << std::flush;
+
+		// get user input, and split it into words
 		StringUtils::GetAndSplitLine( tokens );
 		if( tokens.size() > 0 ) hadStuff = true;
+
+		// and regurn again if HandleLine() returns True
 		loopAgain = this->HandleLine( tokens );
 	} while( loopAgain );
 }

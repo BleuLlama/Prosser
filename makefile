@@ -53,7 +53,10 @@ CFLAGS += -g
 xx += -Wall -pedantic
 
 LDFLAGS += -Lcontrib -L$(LUA_DIR)/lib/
-LIBS += -lMinizip -lz -llua -ldl
+LIBS += -lMinizip -lz -llua
+
+# for NON windows
+LIBS += -ldl
 
 ################################################################################
 

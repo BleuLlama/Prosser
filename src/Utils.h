@@ -12,4 +12,9 @@ public:
 
 public:
 	static void MakeDir( std::string path, int mode = 0755 );
+
+public:
+	static bool DirectoryExists( std::string path );
+	static void DirectoryListing( std::string path, 
+			  std::vector<std::string>& listing );
 };

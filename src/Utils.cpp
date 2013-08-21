@@ -6,6 +6,16 @@
 #include <string>	// for MakeDir
 #include <sys/stat.h>	// for MakeDir
 
+#if defined _WIN32 || defined(__MINGW32__)
+#include "direct.h"
+#include <io.h>
+#endif
+
+// for directoruylistings
+#include <sys/types.h>
+#include <sys/dir.h>
+#include <vector>
+
 #include <iostream>
 #include <fstream>
 
@@ -63,6 +73,16 @@ void Utils::FileCopy( std::string fromPath, std::string toPath )
         fclose( inf );
 }
 
+#if defined _WIN32 || defined(__MINGW32__)
+
+#define OS_MKDIR( P, M ) \
+	_mkdir( P )
+
+#else
+
+#define OS_MKDIR( P, M ) \
+	mkdir( P, M )
+#endif
 
 void Utils::MakeDir( std::string path, int mode )
 {
@@ -80,9 +100,67 @@ void Utils::MakeDir( std::string path, int mode )
 	    dir=path.substr(0,pos++);
 	    pre=pos;
 	    if(dir.size()==0) continue; // if leading / first time is 0 length
-	    if((mdret=mkdir(dir.c_str(),mode)) && errno!=EEXIST){
+	    if((mdret=OS_MKDIR(dir.c_str(),mode)) && errno!=EEXIST){
 		return; // mdret;
 	    }
 	}
 	//return mdret;
+}
+
+bool Utils::DirectoryExists( std::string path )
+{
+	struct stat st;
+	if( stat( path.c_str(), &st ) == 0 ) {
+		if( st.st_mode & S_IFDIR != 0 ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Utils::DirectoryListing( std::string directory, 
+		  std::vector<std::string>& listing )
+{
+	listing.clear();
+#ifdef WINDOWS
+    HANDLE dir;
+    WIN32_FIND_DATA file_data;
+
+    if ((dir = FindFirstFile((directory + "/*").c_str(), &file_data)) == INVALID_HANDLE_VALUE)
+    	return; /* No files found */
+
+    do {
+    	const std::string file_name = file_data.cFileName;
+    	const std::string full_file_name = directory + "/" + file_name;
+
+    	if (file_name[0] == '.')
+    		continue;
+
+    	//listing.push_back(full_file_name);
+    	listing.push_back(file_name);
+    } while (FindNextFile(dir, &file_data));
+
+    FindClose(dir);
+#else
+    DIR *dir;
+    class dirent *ent;
+    class stat st;
+
+    dir = opendir(directory.c_str());
+    while ((ent = readdir(dir)) != NULL) {
+    	const std::string file_name = ent->d_name;
+    	const std::string full_file_name = directory + "/" + file_name;
+
+    	if (file_name[0] == '.')
+    		continue;
+
+    	if (stat(full_file_name.c_str(), &st) == -1)
+    		continue;
+
+    	//listing.push_back(full_file_name);
+    	listing.push_back(file_name);
+    }
+    closedir(dir);
+#endif
+
 }

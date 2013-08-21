@@ -6,6 +6,10 @@ ZLIB_DIR := ../../zlib-1.2.8
 MINIZIP_DIR :=  $(ZLIB_DIR)/contrib/minizip
 
 
+# fix for mingw
+CC = gcc
+
+
 all:  libMinizip.a BLZip.h BLZip.cpp BLUnZip.cpp BLUnZip.h
 
 ################################################################################
