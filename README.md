@@ -312,3 +312,5 @@ On some systems, like raspberry pi, you may need to also install 'zip'.
 
  - item support
  - use the exit names for navigation without "move"
+ - get the explicit path for the executable for unzipping.
+	- path completion/search fails.
