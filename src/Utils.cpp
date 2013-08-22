@@ -111,7 +111,7 @@ bool Utils::DirectoryExists( std::string path )
 {
 	struct stat st;
 	if( stat( path.c_str(), &st ) == 0 ) {
-		if( st.st_mode & S_IFDIR != 0 ) {
+		if( (st.st_mode & S_IFDIR) != 0 ) {
 			return true;
 		}
 	}
