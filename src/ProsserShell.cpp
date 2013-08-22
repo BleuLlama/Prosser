@@ -528,6 +528,8 @@ void ProsserShell::Cmd_New( std::string roomname, std::string copyFrom )
 		copyFrom.assign( this->RoomToFilename( copyFrom ));
 
 		std::string ltxt( this->ContentFromFileOrZip( "skeleton.lua" ));
+
+		Utils::MakeDir( kLiveDir );
 		StringUtils::StringToFile( ltxt, toFile );
 	}
 }
