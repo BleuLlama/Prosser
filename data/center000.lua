@@ -1,4 +1,5 @@
--- center path
+-- this file gets called on crash!
+-- do recovery/dump in here.
 
 room = {
 name = "Town Center",
@@ -28,4 +29,31 @@ function Poll() end
 function RoomDescription()
 	local T = os.time()
 	print( os.date( "The timepiece here reads:  %A %B %d, %I:%M %p", T ))
+end
+
+eastCount = 0
+
+function OnTyped( c, p )
+	if( c == "smell" ) then
+		print "It smells funky in here\n"
+		return kOT_Used
+	end
+
+
+
+	if( ( c == "move" and p == "east" ) 
+	  or ( c == "move" and p == "e" )) then
+
+		eastCount = eastCount +1
+
+		if( eastCount >= 3 ) then
+			print( "You make your way to the east!" )
+			return k_Unused
+		end
+
+		print( "The exit to the " .. p .. " seems blocked" )
+		print( "Try again." )
+		return kOT_Used
+	end
+	return kOT_Unused
 end

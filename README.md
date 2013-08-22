@@ -311,8 +311,4 @@ On some systems, like raspberry pi, you may need to also install 'zip'.
 # todo items
 
  - item support
- - pass down "command run" to the room, for handling things.
-  - returns 1 if it used it (it was valid)
-  - returns 0 if it was unknown.
-  - eg  "smell", "listen" etc.
  - use the exit names for navigation without "move"
