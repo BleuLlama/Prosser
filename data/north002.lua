@@ -1,5 +1,4 @@
--- this file gets called on crash!
--- do recovery/dump in here.
+-- north on the path
 
 room = {
 name = "Town Path",

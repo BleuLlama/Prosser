@@ -1,9 +1,9 @@
--- this file gets called on crash!
--- do recovery/dump in here.
+-- This is an example room, with some basic stuff in it
+-- you should replace things with your own content
 
 room = {
-name = "Skeleton room.",
-description = [[This is a skeleton room.
+    name = "Skeleton room.",
+    description = [[This is a skeleton room.
 Use it as a base for your rooms.]]
 }
 
@@ -23,13 +23,31 @@ function OnUnload()
 end
 
 function OnPoll()
-   -- injectLine = "warp room001"
     print( "skeleton.lua -- Poll\n" );
+    SendCommand( kPSC_Warp, "center000" )
 end
 
 function RoomDescription() end
 
+looks = 0
+
 function OnTyped( c, p )
-    return kOT_Unused
+	if( c == "look" ) then
+		looks = looks + 1
+		return kOT_Unused
+	end
+
+        if( looks >3 ) then
+                room["name"] = "Bedroom"
+                room["description"] = "You see a bedroom."
+        end
+
+	if( looks > 10 ) then
+		return kOT_Veto
+	end
+
+	if( looks > 15 ) then
+		return kOT_Used
+	end
 end
 
