@@ -318,6 +318,8 @@ void ProsserShell::Cmd_Warp( std::string room )
 	if( wizard ) {
 		std::cout << "W: +++ Lua Room is " << this->lastLoaded << ".lua" << std::endl;
 	}
+	std::cout << std::endl;
+	std::cout << std::endl;
 
 	this->Cmd_Look();
 }
@@ -598,8 +600,24 @@ void ProsserShell::Cmd_Edit( std::string param )
 
 		// (live/)param(.lua)
 		if( !Utils::FileExists( filepath )) {
-			filepath.append( ".lua" );
-			// (live/)param.lua
+			std::size_t pos = filepath.find( ".lua" );
+			if( pos == std::string::npos ) {
+				// (live/)param.lua
+				filepath.append( ".lua" );
+			}
+		}
+
+		if( !Utils::FileExists( filepath )) {
+			// it's not there. attempt to synthesize it.
+			std::size_t pos = param.find( ".lua" );
+			if( pos == std::string::npos ) {
+				param += ".lua";
+			}
+
+			std::string txt( this->ContentFromFileOrZip( param ));
+			if( txt.length() > 0 ) {
+				StringUtils::StringToFile( txt, filepath );
+			}
 		}
 
 		if( !Utils::FileExists( filepath )) {
@@ -632,7 +650,26 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	
 	std::string tc = "";
 
-	if( commandList.find( argv[0] ) == commandList.end() )
+	long ret = kOT_Unused;
+
+	// replace argv0 with the proper name.
+	if( commandList.find( argv[0] ) != commandList.end() ) {
+		argv[0] = commandList.find( argv[0] )->second;
+	}
+
+	if( argv.size() == 1 ) {
+		ret = lua->CallFcn( "OnTyped", argv[0], "" );
+	} else {
+		ret = lua->CallFcn( "OnTyped", argv[0], argv[1] );
+	}
+
+	// it was used, just bail out..
+	if( ret == kOT_Used ) {
+		return true;
+	}
+
+	if(   (commandList.find( argv[0] ) == commandList.end() )
+	   || (ret == kOT_Veto ))
 	{
 		// not in the command list.  check the exits:
 		//if( !this->Cmd_Move( argv[0], false )) {

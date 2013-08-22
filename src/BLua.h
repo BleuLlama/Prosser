@@ -96,12 +96,12 @@ public:
 	void FcnCall( int nParams=1, int nRets=0 );
 	//  then pop results
 
-	// simplifed for no params
-	void CallFcn( std::string fcn )
-	{
-		this->FcnName( fcn );
-		this->FcnCall( 0, 0 );
-	}
+public:
+	// void fcn( void )
+	void CallFcn( std::string fcn );
+
+	// int fcn( stringA, stringB )
+	int CallFcn( std::string fcn, std::string pA, std::string pB );
 
 ////////////////////////////////////////
 // variable access
