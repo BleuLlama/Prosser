@@ -43,6 +43,8 @@ THE SOFTWARE.
 int main( int argc, char ** argv )
 {
 	bool wizard = false;
+
+	std::cout << "Argv0 is " << argv[0] << std::endl;
 	for( int a=1 ; a<argc ; a++ )
 	{
 		if( StringUtils::SameStringCI( "-wizard", argv[a] )) 
