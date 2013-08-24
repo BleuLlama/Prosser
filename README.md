@@ -55,6 +55,7 @@ Lua files can send commands to the engine using the SendCommand() function.  Cur
  - kPSC_Warp		- change rooms to someplace else immediately
  - kPSC_Save		- save the player data to the save file
  - kPSC_Load		- load the player data from the save file
+ - kPSC_Include		- load and run the indicated LUA file
 
 The standard operating procedure is to put the Warp to your first room
 within the OnLoad() function of your startup-sequence.
