@@ -357,9 +357,9 @@ void ProsserShell::Cmd_Help( void )
 	std::cout << "Commands:" << std::endl;
 
 	std::map<std::string, std::string>::iterator iter;
-	for (iter = commandList.begin(); iter != commandList.end(); ++iter) {
-		std::string cmdname( iter->second );
-		std::string helptext = helpList[ cmdname ];
+	for (iter = helpList.begin(); iter != helpList.end(); ++iter) {
+		std::string cmdname( iter->first );
+		std::string helptext = iter->second;
 
 		bool isWizcmd = false;
 		if( helptext.size() > 3 ) {
@@ -368,7 +368,7 @@ void ProsserShell::Cmd_Help( void )
 
 		if( !isWizcmd || ( isWizcmd && wizard ))
 		{
-			printf( "     %8s - %s\n", cmdname.c_str(), helptext.c_str() );
+			printf( "     %9s - %s\n", cmdname.c_str(), helptext.c_str() );
 		}
 	}
 }
@@ -736,14 +736,32 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		return true;
 	}
 
+	// okay. now we'll check the list of exits to find if 
+	// argv[0] matches any of them.  if so, we'll re-inject 
+	// with a "move" command
+	int i = 1;
+	std::string name = lua->GetTableString( "exits", "name", i );
+	std::string alias = lua->GetTableString( "exits", "alias", i );
+
+	while( name.length() > 0 ) {
+		if(   StringUtils::SameStringCI( argv[0], name )
+		   || StringUtils::SameStringCI( argv[0], alias ))
+		{
+			this->Cmd_Move( argv[0] );
+			return true;
+		}
+
+		i++;
+		name = lua->GetTableString( "exits", "name", i );
+		alias = lua->GetTableString( "exits", "alias", i );
+	}
+
+	// look for the command in the commandList
 	if(   (commandList.find( argv[0] ) == commandList.end() )
 	   || (ret == kOT_Veto ))
 	{
-		// not in the command list.  check the exits:
-		//if( !this->Cmd_Move( argv[0], false )) {
-			std::cout << argv[0] << ": What?" << std::endl;
-			return true;
-		//}
+		std::cout << argv[0] << ": What?" << std::endl;
+		return true;
 	}
 
 	age++;

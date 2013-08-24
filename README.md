@@ -94,7 +94,8 @@ items, containing:
 When the user types "Go" or "move" with an option that matches
 either a name or alias in the exits structure, the local "OnUnload()"
 function is called, then the other lua room is loaded immediately
-(with "cleanRoom" loaded just before, of course).
+(with "cleanRoom" loaded just before, of course). The user can also
+just type the exit name to "move" through it as well.
 
 If something goes horribly wrong, then "crash.lua" is run.
 
@@ -215,7 +216,7 @@ Here is an example of a room.
     function OnUnload() end
     function Poll() end
     function RoomDescription() end
-    function OnTyped() return kOTUnused end
+    function OnTyped( c, p ) return kOTUnused end
 
 
 Since Lua is dynamic, you can actively change things each time the
@@ -306,15 +307,3 @@ And Lua:
 On some systems, like raspberry pi, you may need to also install 'zip'.
 
 	sudo apt-get install zip
-
-
-
-# todo items
-
- - item support
-
- - use the exit names for navigation without "move"
-
- - get the explicit path for the executable for unzipping.
-	- path completion/search fails.
-	- not really easily feasible
