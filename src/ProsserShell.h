@@ -49,6 +49,7 @@ THE SOFTWARE.
 
 #define kVersionString "v008 2013-Aug-20"
 
+// v009  2013-Aug-24	Items, move without "move"
 // v008  2013-Aug-20	Rooms, editing, preliminary items
 
 ////////////////////////////////////////////////////////////////////////////////
