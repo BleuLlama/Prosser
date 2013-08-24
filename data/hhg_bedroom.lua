@@ -2,7 +2,8 @@
 
 
 room = {
-name = "Darkness",
+    short = "hhg_bedroom",
+    name = "Darkness",
     description = [[You cannot see anything]],
 }
 

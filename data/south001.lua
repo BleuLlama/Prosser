@@ -1,8 +1,9 @@
 -- south path
 
 room = {
-name = "Town Path",
-description = [[This is the path through the town.]]
+    short = "south001",
+    name = "Town Path",
+    description = [[This is the path through the town.]]
 }
 
 exits = {

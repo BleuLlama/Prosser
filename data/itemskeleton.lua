@@ -3,8 +3,8 @@
 -- ITEM -- TBD
 
 item = {
-name = "Skeleton room.",
-description = [[This is a skeleton room.
+    name = "Skeleton item.",
+    description = [[This is a skeleton room.
 Use it as a base for your rooms.]]
 }
 

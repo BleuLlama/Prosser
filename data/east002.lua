@@ -1,7 +1,8 @@
 -- east path
 
 room = {
-name = "The Hub",
+    short = "east002",
+    name = "The Hub",
     description = [[Welcome to The Hub.
 From here, you can wander off into any number
 of realms for exploration and adventure.

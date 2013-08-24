@@ -2,6 +2,7 @@
 -- you should replace things with your own content
 
 room = {
+    short = "skeleton",
     name = "Skeleton room.",
     description = [[This is a skeleton room.
 Use it as a base for your rooms.]]

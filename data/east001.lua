@@ -1,8 +1,9 @@
 -- east path
 
 room = {
-name = "Easterly Path",
-description = [[This path winds off to the east and west]]
+    short = "east001",
+    name = "Easterly Path",
+    description = [[This path winds off to the east and west]]
 }
 
 exits = {

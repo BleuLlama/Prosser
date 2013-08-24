@@ -2,14 +2,15 @@
 -- do recovery/dump in here.
 
 room = {
-name = "Town Center",
-description = [[This is the center of the town
+    short = "center000",
+    name = "Town Center",
+    description = [[This is the center of the town
 Welcome!
 There seems to be a path here.]],
 
-testbool = true,
-num1 = 32,
-num3 = 99.29
+    testbool = true,
+    num1 = 32,
+    num3 = 99.29
 }
 
 exits = {
@@ -17,9 +18,11 @@ exits = {
 	description = "There is a path to the north."  },
     { name="South", alias="S", lua="south001",
 	description = "There is a path to the south."  },
-
     { name="East", alias="E", lua="east001",
-	description = "The path also goes to the east." }
+	description = "The path also goes to the east." },
+
+    { name="Itemtest", alias="I", lua="itemtest",
+	description = "Experiment with items in the 'itemtest' room" }
 }
 
 function OnLoad() end
