@@ -44,13 +44,11 @@ int main( int argc, char ** argv )
 {
 	bool wizard = false;
 
-	std::cout << "Argv0 is " << argv[0] << std::endl;
 	for( int a=1 ; a<argc ; a++ )
 	{
 		if( StringUtils::SameStringCI( "-wizard", argv[a] )) 
 			wizard = true;
 	}
-
 
 	ProsserShell * sh = new ProsserShell( argv[0], wizard );
 	if( sh->isLoaded() ) sh->Go();
