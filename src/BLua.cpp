@@ -371,6 +371,14 @@ void BLua::CallFcn( std::string fcn )
 	this->FcnCall( 0, 0 );
 }
 
+// void fcn( stringA )
+void BLua::CallFcn( std::string fcn, std::string pA )
+{
+	this->FcnName( fcn );
+	this->PushString( pA );
+	this->FcnCall( 1, 0 );
+}
+
 // int fcn( stringA, stringB )
 int BLua::CallFcn( std::string fcn, std::string pA, std::string pB )
 {
@@ -381,6 +389,14 @@ int BLua::CallFcn( std::string fcn, std::string pA, std::string pB )
 	long retval = this->StackLong();
 	this->Pop();
 	return retval;
+}
+
+void BLua::CallFcnNR( std::string fcn, std::string pA, std::string pB )
+{
+	this->FcnName( fcn );
+	this->PushString( pA );
+	this->PushString( pB );
+	this->FcnCall( 2, 0 );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

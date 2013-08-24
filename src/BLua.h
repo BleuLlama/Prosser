@@ -100,8 +100,12 @@ public:
 	// void fcn( void )
 	void CallFcn( std::string fcn );
 
+	// void fcn( stringA )
+	void CallFcn( std::string fcn, std::string pA );
+
 	// int fcn( stringA, stringB )
 	int CallFcn( std::string fcn, std::string pA, std::string pB );
+	void CallFcnNR( std::string fcn, std::string pA, std::string pB );
 
 ////////////////////////////////////////
 // variable access

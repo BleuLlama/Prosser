@@ -1,22 +1,3 @@
--- This is an example room, with some basic stuff in it
--- you should replace things with your own content
-
---------------------------------------------------------------------------------
-room = {
-    short = "itemtest",
-    name = "Item test room.",
-    description = [[
-This room was created to experiment with item tests.
-]]
-}
-
-exits = {
-    { name="Center", alias="c", lua="center000",
-	description = "Go back to the 'c'enter." }
-}
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
 -- Item class
 
 
@@ -127,14 +108,6 @@ function AddItem( name, hp, location )
 	end
 end
 
-
-
-AddItem( "carrot", 10, "room0" )
-AddItem( "slime", -5, "itemtest" )
-AddItem( "cheese", 5, "itemtest" )
-AddItem( "key", 0, "PLAYER" )
-AddItem( "taco", 1, "chessroom" )
-
 function ItemDump()
 	print( "All items:" )
 	for k in pairs( itemlist ) do
@@ -217,17 +190,35 @@ function ItemEat( name, thisroom )
 end
 
 function ItemListing( location )
+	-- count the number of items
+	local itemcount = 0
+	for k in pairs( itemlist ) do
+		if( itemlist[k].location == location ) then
+			itemcount = itemcount + 1
+		end
+	end
+
+	-- check for zero items
+	if( itemcount == 0 ) then
+		if( location == "PLAYER" ) then
+			print( "You have nothing." )
+			return
+		end
+
+		return
+	end
+
+	-- print the header
 	if( location == "PLAYER" ) then
 		print( "Your inventory:" )
 	else
 		print( "Items here:" )
 	end
 
-	local itemcount = 0
+	-- and print the list
 	for k in pairs( itemlist ) do
 		if( itemlist[k].location == location ) then
 			print( "   " .. k )
-			itemcount = itemcount + 1
 		end
 	end
 
@@ -235,87 +226,3 @@ function ItemListing( location )
 		print( "   (nothing)")
 	end
 end
-
---------------------------------------------------------------------------------
-
-function OnLoad()
-    print( "skeleton.lua -- OnLoad\n" )
-end
-
-function OnUnload()
-    print( "skeleton.lua -- OnUnload\n" )
-end
-
-function OnPoll()
-    print( "skeleton.lua -- Poll\n" );
-    SendCommand( kPSC_Warp, "center000" )
-end
-
-function RoomDescription()
-	ItemListing( room["short"] )
-end
-
---------------------------------------------------------------------------------
-looks = 0
-
-function OnTyped( c, p )
-
-	if( c == "get" ) then
-		ItemGet( p, room["short"] )
-		return kOT_Used
-	end
-
-	if( c == "drop" ) then
-		ItemDrop( p, room["short"] )
-		return kOT_Used
-	end
-
-	if( c == "use" ) then
-		ItemUse( p, room["short"] )
-		return kOT_Used
-	end
-	if( c == "eat" ) then
-		ItemEat( p, room["short"] )
-		return kOT_Used
-	end
-
-
-	if( c == "exa" or c == "look" ) then
-		if( p ~= "" ) then
-			ItemExamine( p, room["short"] )
-			return kOT_Used
-		end
-	end
-
-	if( c == "i" or c == "inventory" ) then
-		ItemListing( "PLAYER" )
-		return kOT_Used
-	end
-
-	if( c == "items" ) then
-		ItemDump()
-		return kOT_Used
-	end
-
-
-
-
-	if( c == "look" ) then
-		looks = looks + 1
-		return kOT_Unused
-	end
-
-        if( looks >3 ) then
-                room["name"] = "Bedroom"
-                room["description"] = "You see a bedroom."
-        end
-
-	if( looks > 10 ) then
-		return kOT_Veto
-	end
-
-	if( looks > 15 ) then
-		return kOT_Used
-	end
-end
-

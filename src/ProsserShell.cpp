@@ -78,6 +78,8 @@ int luaSendCommand( lua_State *L )
 
 void ProsserShell::SendCommand( int key, std::string param )
 {
+	std::string ltxt;
+
 	switch( key ) {
 	case( kPSC_Warp ):
 		if( param.length() > 0 ) this->Cmd_Warp( param );
@@ -89,6 +91,14 @@ void ProsserShell::SendCommand( int key, std::string param )
 
 	case( kPSC_Load ):
 		this->Cmd_Load();
+		break;
+
+	case( kPSC_Include ):
+		ltxt.assign( this->ContentFromFileOrZip( param ));
+		if( ltxt.size() == 0 ) {
+			ltxt.assign(  this->ContentFromFileOrZip( param + ".lua" ));
+		}
+		lua->RunString( ltxt );
 		break;
 
 	case( kPSC_Null ):
@@ -181,11 +191,28 @@ void ProsserShell::PrepCommands( void )
 	commandList[ "?" ] = "help";
 	commandList[ "help" ] = "help";
 	helpList[ "help" ] = "Display this help screen.";
+	commandList[ "exa" ] = "look";
 	commandList[ "look" ] = "look";
-	helpList[ "look" ] = "Look around the current room.";
+	helpList[ "look" ] = "Look around the current room or at an item.";
 	commandList[ "move" ] = "move";
 	commandList[ "go" ] = "move";
 	helpList[ "move" ] = "Move/Go through one of the room's exits.";
+
+	commandList[ "get" ] = "get";
+	commandList[ "drop" ] = "drop";
+	commandList[ "use" ] = "use";
+	commandList[ "wear" ] = "use";
+	commandList[ "don" ] = "use";
+	commandList[ "eat" ] = "eat";
+	commandList[ "me" ] = "me";
+	commandList[ "i" ] = "inventory";
+	commandList[ "inventory" ] = "inventory";
+	helpList[ "get" ] = "Pick up an item";
+	helpList[ "drop" ] = "Drop an item";
+	helpList[ "use" ] = "Use an item";
+	helpList[ "eat" ] = "Eat an item";
+	helpList[ "inventory" ] = "Get inventory of stuff you have";
+	helpList[ "me" ] = "find out about yourself";
 
 	commandList[ "wizard" ] = "wizard";
 	helpList[ "wizard" ] = "Toggle Wizard mode.";
@@ -437,6 +464,7 @@ void ProsserShell::Cmd_Look( void )
 	std::string roomDesc = lua->GetTableString( "room", "description" );
 	if( roomDesc.length() > 0 ) std::cout << roomDesc << std::endl;
 	lua->CallFcn( "RoomDescription" );
+	lua->CallFcn( "ItemListing", lastLoaded );
 
 	// debug text
 
@@ -642,6 +670,44 @@ void ProsserShell::Cmd_Wizard( void )
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// item interfaces (uses a lot on the lua side)
+void ProsserShell::Cmd_Get( std::string item )
+{
+	lua->CallFcnNR( "ItemGet", item, this->lastLoaded );
+}
+
+void ProsserShell::Cmd_Drop( std::string item )
+{
+	lua->CallFcnNR( "ItemDrop", item, this->lastLoaded );
+}
+
+void ProsserShell::Cmd_Use( std::string item )
+{
+	lua->CallFcnNR( "ItemUse", item, this->lastLoaded );
+}
+
+void ProsserShell::Cmd_Eat( std::string item )
+{
+	lua->CallFcnNR( "ItemEat", item, this->lastLoaded );
+}
+
+void ProsserShell::Cmd_Exa( std::string item )
+{
+	lua->CallFcnNR( "ItemExamine", item, this->lastLoaded );
+}
+
+void ProsserShell::Cmd_Inventory( void )
+{
+	lua->CallFcn( "ItemListing", "PLAYER" );
+}
+
+void ProsserShell::Cmd_Me( void )
+{
+	lua->CallFcn( "Me" );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 
 bool ProsserShell::HandleLine( std::vector<std::string> argv )
 {
@@ -649,6 +715,8 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	if( argv.size() < 1 ) return true;
 	
 	std::string tc = "";
+
+	std::string param = "";
 
 	long ret = kOT_Unused;
 
@@ -682,6 +750,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 
 	////////////////////////////////////////
 	tc.assign( commandList[ argv[0] ] );
+	if( argv.size() >= 2 ) param = argv[1];
 
 	if(  StringUtils::SameStringCI( tc, "quit" )) return false;
 
@@ -692,6 +761,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 			tc.assign( "listzip" );
 	}
 
+
 	if(  StringUtils::SameStringCI( tc, "help" )) this->Cmd_Help(); 
 	
 	if(  StringUtils::SameStringCI( tc, "listzip" ) && this->wizard ) this->Cmd_ListZip();
@@ -700,7 +770,21 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 
 	if(  StringUtils::SameStringCI( tc, "move" )) this->Cmd_Move( argv[1] );
 
-	if(  StringUtils::SameStringCI( tc, "look" )) this->Cmd_Look();
+	if(  StringUtils::SameStringCI( tc, "look" )) {
+		if( argv.size() >= 2 ) {
+			this->Cmd_Exa( argv[1] );
+		} else {
+			this->Cmd_Look();
+		}
+	}
+
+	if(  StringUtils::SameStringCI( tc, "get" )) this->Cmd_Get( param );
+	if(  StringUtils::SameStringCI( tc, "drop" )) this->Cmd_Drop( param );
+	if(  StringUtils::SameStringCI( tc, "use" )) this->Cmd_Use( param );
+	if(  StringUtils::SameStringCI( tc, "eat" )) this->Cmd_Eat( param );
+	if(  StringUtils::SameStringCI( tc, "examine" )) this->Cmd_Exa( param );
+	if(  StringUtils::SameStringCI( tc, "inventory" )) this->Cmd_Inventory();
+	if(  StringUtils::SameStringCI( tc, "me" )) this->Cmd_Me();
 
 	if(  StringUtils::SameStringCI( tc, "room" ) && this->wizard ) this->Cmd_Room();
 

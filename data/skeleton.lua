@@ -50,5 +50,7 @@ function OnTyped( c, p )
 	if( looks > 15 ) then
 		return kOT_Used
 	end
+
+	return kOT_Unused
 end
 

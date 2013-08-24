@@ -9,6 +9,7 @@ kPSC_Null = 0
 kPSC_Warp = 1
 kPSC_Save = 2
 kPSC_Load = 3
+kPSC_Include = 4
 
 -- for the OnTyped function to return. 
 kOT_Unused = 0
@@ -19,6 +20,13 @@ kOT_Veto = 2
 -- game load should be in here.
 
 function OnLoad()
+	-- include the item core
+	SendCommand( kPSC_Include, "itemcore" )
+
+	-- and add the items
+	SendCommand( kPSC_Include, "itemlist" )
+
+	-- and warp to another warp
 	SendCommand( kPSC_Warp, "center000" )
 end
 

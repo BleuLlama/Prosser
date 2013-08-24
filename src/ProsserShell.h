@@ -81,6 +81,7 @@ public:
 	#define kPSC_Warp	(1)
 	#define kPSC_Save	(2)
 	#define kPSC_Load	(3)
+	#define kPSC_Include	(4)
 	void SendCommand( int key, std::string value );
 
 public:
@@ -109,8 +110,16 @@ public:
 	void Cmd_Save( void );
 	void Cmd_Load( void );
 
-public:
-	bool HandleLine( std::vector<std::string> argv );
+	void Cmd_Get( std::string item );
+	void Cmd_Drop( std::string item );
+	void Cmd_Use( std::string item );
+	void Cmd_Eat( std::string item );
+	void Cmd_Exa( std::string item );
+	void Cmd_Inventory( void );
+	void Cmd_Me( void );
+
+	public:
+		bool HandleLine( std::vector<std::string> argv );
 	void PrePrompt( void );
 	std::string GetPrompt( void );
 
