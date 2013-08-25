@@ -193,6 +193,9 @@ void ProsserShell::Init( void )
 	}
 	this->lua = new BLua();
 
+	this->lua->SetLong( "age_command", this->age_command );
+	this->lua->SetLong( "age_return", this->age_return );
+
 	this->lua->RegisterFunction( "SendCommand", luaSendCommand );
 
 	if( !this->LoadLua( "startup-sequence" ) ) {
@@ -340,7 +343,7 @@ bool ProsserShell::LoadLua( std::string path )
 
 void ProsserShell::PrePrompt( void )
 {
-	lua->CallFcn( "Poll" );
+	lua->CallFcn( "OnPoll" );
 }
 
 
@@ -466,9 +469,17 @@ bool ProsserShell::Cmd_Move( std::string exitname, bool quiet )
 	std::string alias = lua->GetTableString( "exits", "alias", i );
 	std::string luafile = lua->GetTableString( "exits", "lua", i );
 
+	std::string usedExitName( "" );
+	std::string usedExitShort( "" );
+
 	while( name.length() > 0 ) {
-		if( StringUtils::SameStringCI( exitname, name )) newLuaName.assign( luafile );
-		if( StringUtils::SameStringCI( exitname, alias )) newLuaName.assign( luafile );
+		if( StringUtils::SameStringCI( exitname, name )
+		 || StringUtils::SameStringCI( exitname, alias ) ) {
+			newLuaName.assign( luafile );
+			usedExitName.assign( name );
+			usedExitShort.assign( alias );
+			break;
+		}
 
 		i++;
 		name = lua->GetTableString( "exits", "name", i );
@@ -483,6 +494,8 @@ bool ProsserShell::Cmd_Move( std::string exitname, bool quiet )
 	} else { 
 		//std::cout << " new lua is " << newLuaName << std::endl;
 	}
+
+	lua->CallFcnNR( "OnMove", usedExitName, usedExitShort );
 
 	Cmd_Warp( newLuaName );
 	return true;
@@ -752,6 +765,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	if( this->forceExit == true ) return false;
 
 	this->age_return++;
+	this->lua->SetLong( "age_return", this->age_return );
 
 	// no content.. just continue
 	if( argv.size() < 1 ) return true;
@@ -775,6 +789,9 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 
 	// it was used, just bail out..
 	if( ret == kOT_Used ) {
+		this->age_command++;
+		this->lua->SetLong( "age_command", this->age_command );
+
 		return true;
 	}
 
@@ -789,6 +806,9 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		if(   StringUtils::SameStringCI( argv[0], name )
 		   || StringUtils::SameStringCI( argv[0], alias ))
 		{
+			this->age_command++;
+			this->lua->SetLong( "age_command", this->age_command );
+
 			this->Cmd_Move( argv[0] );
 			return true;
 		}
@@ -807,6 +827,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	}
 
 	this->age_command++;
+	this->lua->SetLong( "age_command", this->age_command );
 
 	////////////////////////////////////////
 	tc.assign( commandList[ argv[0] ] );

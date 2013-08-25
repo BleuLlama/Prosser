@@ -175,7 +175,7 @@ Here is a list of functions in a room that are called by the interpreter:
  - OnLoad()	- once, when the file is loaded / player walks in
  - OnUnload()	- once, when the file is unloaded / player leaves
  - RoomDescription() - when the user types "look"
- - Poll()		- just before the command prompt is printed out
+ - OnPoll()		- just before the command prompt is printed out
  - Typed() 	- the user typed this. See above for more info
 
 Here is a list of expected structures in a room
@@ -214,7 +214,7 @@ Here is an example of a room.
 
     function OnLoad() end
     function OnUnload() end
-    function Poll() end
+    function OnPoll() end
     function RoomDescription() end
     function OnTyped( c, p ) return kOTUnused end
 

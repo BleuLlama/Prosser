@@ -23,6 +23,10 @@ function OnUnload()
     print( "skeleton.lua -- OnUnload\n" )
 end
 
+function OnMove( exitname, exitalias ) 
+    print( "Leaving through exit named " .. exitname .. "(" ..  exitalias .. ")" )
+end
+
 function OnPoll()
     print( "skeleton.lua -- Poll\n" );
     SendCommand( kPSC_Warp, "center000" )

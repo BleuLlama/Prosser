@@ -21,8 +21,9 @@ items = nil;
 
 function OnLoad() end
 function OnUnload() end
-function Poll() end
+function OnPoll() end
 function RoomDescription() end
+function OnMove( exitname, exitalias ) end
 
 function OnTyped( c, p )
     return kOT_Unused

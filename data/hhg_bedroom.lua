@@ -19,7 +19,7 @@ newexits = {
 
 function OnLoad() end
 function OnUnload() end
-function Poll() end
+function OnPoll() end
 
 
 views = 0

@@ -19,4 +19,4 @@ exits = {
 function OnLoad() end
 function OnUnload() end
 function RoomDescription() end
-function Poll() end
+function OnPoll() end

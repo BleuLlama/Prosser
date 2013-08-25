@@ -10,7 +10,7 @@ setmetatable( ItemClass, {
 	end,
 })
 
-function ItemClass:new( name, hp, location )
+function ItemClass:new( name, hp, location, desc, onuse )
 	local self = setmetatable( {}, ItemClass  )
 
 	-- name of the item
@@ -24,6 +24,12 @@ function ItemClass:new( name, hp, location )
 	--		DESTROYED 	- broken, gone
 	self.location = location
 	self.uses = -1
+
+	-- description string
+	self.description = desc
+
+	-- function to call for when it gets used
+	self.onuse = onuse
 
 	return self
 end
@@ -58,10 +64,16 @@ function ItemClass:Eat()
 	print( "You cannot eat " .. self:Name() )
 end
 
-
 function ItemClass:Use()
-	local ret = false
+	_G[self.onuse]()
+end
 
+
+	-- for consumables, the following is useful
+
+function ItemClass:consumeableUse()
+	
+	local ret = false
 	if( self.uses > 0 ) then
 		print( "You used the " .. self:Name() ) 
 		self.uses = self.uses - 1
@@ -100,11 +112,9 @@ end
 
 itemlist = {}
 
-function AddItem( name, hp, location )
+function AddItem( name, hp, location, desc, use )
 	if( itemlist[ name ] == nil ) then
-		itemlist[name] = ItemClass:new( name, hp, location )
-		desc = "It's just a " .. name
-		itemlist[name].description = desc
+		itemlist[name] = ItemClass:new( name, hp, location, desc, use )
 	end
 end
 

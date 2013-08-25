@@ -27,7 +27,7 @@ exits = {
 
 function OnLoad() end
 function OnUnload() end
-function Poll() end
+function OnPoll() end
 
 function RoomDescription()
 	local T = os.time()
