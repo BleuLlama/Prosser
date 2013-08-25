@@ -7,6 +7,8 @@ room = {
     name = "Item test room.",
     description = [[
 This room was created to experiment with item tests.
+
+Type 'restart' in here to restart the system.
 ]]
 }
 
@@ -35,49 +37,23 @@ end
 --------------------------------------------------------------------------------
 looks = 0
 
-function oldOnTyped( c, p )
-
-	if( c == "get" ) then
-		ItemGet( p, room["short"] )
-		return kOT_Used
-	end
-
-	if( c == "drop" ) then
-		ItemDrop( p, room["short"] )
-		return kOT_Used
-	end
-
-	if( c == "use" ) then
-		ItemUse( p, room["short"] )
-		return kOT_Used
-	end
-	if( c == "eat" ) then
-		ItemEat( p, room["short"] )
-		return kOT_Used
-	end
-
-
-	if( c == "exa" or c == "look" ) then
-		if( p ~= "" ) then
-			ItemExamine( p, room["short"] )
-			return kOT_Used
-		end
-	end
-
-	if( c == "i" or c == "inventory" ) then
-		ItemListing( "PLAYER" )
-		return kOT_Used
-	end
-
+function OnTyped( c, p )
 	if( c == "items" ) then
 		ItemDump()
 		return kOT_Used
 	end
 
-end
+	if( c == "restart" ) then
+        	SendCommand( kPSC_Restart, "" )
+		return kOT_Used
+	end
 
+	if( c == "kill" and p == "self" ) then
+		print( "YOU DIE NOW." )
+        	SendCommand( kPSC_Quit, "" )
+		return kOT_Used
+	end
 
-function OnTyped( c, p )
 	if( c == "look" ) then
 		looks = looks + 1
 		return kOT_Unused
