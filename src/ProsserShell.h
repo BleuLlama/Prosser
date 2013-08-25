@@ -49,6 +49,8 @@ THE SOFTWARE.
 
 #define kVersionString "v008 2013-Aug-20"
 
+
+// v010	 2013-Aug-24    Restart/Init/Deinit added
 // v009  2013-Aug-24	Items, move without "move"
 // v008  2013-Aug-20	Rooms, editing, preliminary items
 
@@ -61,9 +63,11 @@ private:
 	BLua * lua;
 	BLUnZip * datafile;
 	bool wizard;
+	bool forceExit;
 	bool loaded;
 	int age;
 	std::string lastLoaded;
+	std::string argv0;
 
 	std::map<std::string, std::string> commandList;
 	std::map<std::string, std::string> helpList;
@@ -72,6 +76,10 @@ private:
 public:
 	ProsserShell( std::string argv0, bool isWizard = false );
 	~ProsserShell();
+
+public:
+	void Init();
+	void Deinit();
 
 public:
 	static ProsserShell * Shared( void );
@@ -83,6 +91,8 @@ public:
 	#define kPSC_Save	(2)
 	#define kPSC_Load	(3)
 	#define kPSC_Include	(4)
+	#define kPSC_Restart	(5)
+	#define kPSC_Quit	(6)
 	void SendCommand( int key, std::string value );
 
 public:

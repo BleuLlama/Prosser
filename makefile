@@ -84,10 +84,16 @@ $(TARGA): $(OBJSA)
 	@echo Link $@
 	@$(CXX) $(CFLAGS) $(OBJSA) $(LDFLAGS) $(LIBS) -o $@
 
+RIGHTNOW := $(shell date +%Y-%m-%d_%H%M)
+
 dist: $(TARGA) $(WADA)
 	@echo appending WAD ZIP file to EXE
 	@cat $(WADA) >> $(TARGA)
 	@rm $(WADA)
+
+dropbox: dist
+	@echo copying zip to dropbox folder
+	@zip ~/Dropbox/LD48/game_$(RIGHTNOW).zip $(TARGA)
 
 ################################################################################
 

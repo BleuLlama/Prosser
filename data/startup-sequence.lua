@@ -10,6 +10,8 @@ kPSC_Warp = 1
 kPSC_Save = 2
 kPSC_Load = 3
 kPSC_Include = 4
+kPSC_Restart = 5
+kPSC_Quit = 6
 
 -- for the OnTyped function to return. 
 kOT_Unused = 0

@@ -101,6 +101,15 @@ void ProsserShell::SendCommand( int key, std::string param )
 		lua->RunString( ltxt );
 		break;
 
+	case( kPSC_Restart ):
+		this->Deinit();
+		this->Init();
+		break;
+
+	case( kPSC_Quit ):
+		this->forceExit = true;
+		break;
+
 	case( kPSC_Null ):
 	default:
 		std::cout << "SendCommand DNF error" << std::endl;
@@ -112,12 +121,14 @@ void ProsserShell::SendCommand( int key, std::string param )
 
 static ProsserShell * _shared = NULL;
 
-ProsserShell::ProsserShell( std::string argv0, bool isWizard )
+ProsserShell::ProsserShell( std::string _argv0, bool isWizard )
 	: version( kVersionString )
 	, wizard( isWizard )
+	, forceExit( false )
 	, loaded( false )
 	, age( 0 )
 	, lastLoaded( "" )
+	, argv0( _argv0 )
 {
 	if( !_shared ) {
 		_shared = this;
@@ -126,6 +137,22 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 	std::cout << "Prosser SUD " << version << std::endl;
 	std::cout << std::endl;
 
+	this->Init();
+
+	this->PrepCommands();
+} 
+
+void ProsserShell::Deinit( void )
+{
+	delete this->datafile;
+	this->datafile = NULL;
+
+	//delete this->lua;
+	//this->lua = NULL;
+}
+
+void ProsserShell::Init( void )
+{
 	// okay. so the zip file parser will scan for PK\003\004,
 	// so we'll just try loading ourselves, in case the zip
 	// file is appended to us.
@@ -146,7 +173,7 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 	// It tries to load *us* as a zip file.  If it works,
 	// great.  we're done.  If not, load 'wad.zip' instead.
 
-	this->datafile = new BLUnZip( argv0 );
+	this->datafile = new BLUnZip( this->argv0 );
 
 	if( this->datafile->isValid() ) {
 		if( wizard ) std::cout << "W: Using .exe as the source zip!" << std::endl;
@@ -166,14 +193,12 @@ ProsserShell::ProsserShell( std::string argv0, bool isWizard )
 		std::cout << "Unable to initialize system." << std::endl;
 		return;
 	}
-
 	std::cout << std::endl;
-
-	this->PrepCommands();
 }
 
 ProsserShell::~ProsserShell( void )
 {
+	this->Deinit();
 }
 
 ProsserShell * ProsserShell::Shared( void )
@@ -186,8 +211,8 @@ void ProsserShell::PrepCommands( void )
 {
 	// commandList[ "word the user types" ] = "internal command handler";
 	// common commands
-	commandList[ "quit" ] = "quit";
-	helpList[ "quit" ] = "Quit.";
+	//commandList[ "quit" ] = "quit";
+	//helpList[ "quit" ] = "Quit.";
 	commandList[ "?" ] = "help";
 	commandList[ "help" ] = "help";
 	helpList[ "help" ] = "Display this help screen.";
@@ -316,6 +341,12 @@ void ProsserShell::PrePrompt( void )
 std::string ProsserShell::GetPrompt( void )
 {
 	std::ostringstream ss;
+
+	if( this->forceExit == true )
+	{
+		ss << "Press [return] to exit.";
+		return ss.str();
+	}
 
 	if( this->wizard ) {
 		ss << " (W)  " << this->lastLoaded;
@@ -711,6 +742,9 @@ void ProsserShell::Cmd_Me( void )
 
 bool ProsserShell::HandleLine( std::vector<std::string> argv )
 {
+	// check for a forced exit from message.
+	if( this->forceExit == true ) return false;
+
 	// no content.. just continue
 	if( argv.size() < 1 ) return true;
 	
@@ -770,7 +804,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	tc.assign( commandList[ argv[0] ] );
 	if( argv.size() >= 2 ) param = argv[1];
 
-	if(  StringUtils::SameStringCI( tc, "quit" )) return false;
+	//if(  StringUtils::SameStringCI( tc, "quit" )) return false;
 
 	if(  StringUtils::SameStringCI( tc, "warp" ) && this->wizard ) {
 		if( argv.size() == 2 ) 
