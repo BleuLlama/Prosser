@@ -126,7 +126,8 @@ ProsserShell::ProsserShell( std::string _argv0, bool isWizard )
 	, wizard( isWizard )
 	, forceExit( false )
 	, loaded( false )
-	, age( 0 )
+	, age_command( 0 )
+	, age_return( 0 )
 	, lastLoaded( "" )
 	, argv0( _argv0 )
 {
@@ -172,6 +173,11 @@ void ProsserShell::Init( void )
 
 	// It tries to load *us* as a zip file.  If it works,
 	// great.  we're done.  If not, load 'wad.zip' instead.
+
+	this->loaded = false;
+	this->age_command = 0;
+	this->age_return = 0;
+	this->lastLoaded = "";
 
 	this->datafile = new BLUnZip( this->argv0 );
 
@@ -351,7 +357,7 @@ std::string ProsserShell::GetPrompt( void )
 	if( this->wizard ) {
 		ss << " (W)  " << this->lastLoaded;
 	}
-	ss << "  [" << this->age << "] >";
+	ss << "  [" << this->age_command << "] >";
 	return ss.str();
 }
 
@@ -745,6 +751,8 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	// check for a forced exit from message.
 	if( this->forceExit == true ) return false;
 
+	this->age_return++;
+
 	// no content.. just continue
 	if( argv.size() < 1 ) return true;
 	
@@ -798,7 +806,7 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		return true;
 	}
 
-	age++;
+	this->age_command++;
 
 	////////////////////////////////////////
 	tc.assign( commandList[ argv[0] ] );

@@ -65,7 +65,8 @@ private:
 	bool wizard;
 	bool forceExit;
 	bool loaded;
-	int age;
+	int age_command; // every time a command is typed
+	int age_return; // every time the user hits return
 	std::string lastLoaded;
 	std::string argv0;
 
