@@ -94,6 +94,7 @@ public:
 	#define kPSC_Include	(4)
 	#define kPSC_Restart	(5)
 	#define kPSC_Quit	(6)
+	#define kPSC_Version	(7)
 	void SendCommand( int key, std::string value );
 
 public:

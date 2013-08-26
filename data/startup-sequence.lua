@@ -12,6 +12,7 @@ kPSC_Load = 3
 kPSC_Include = 4
 kPSC_Restart = 5
 kPSC_Quit = 6
+kPSC_Version = 7
 
 -- for the OnTyped function to return. 
 kOT_Unused = 0
@@ -22,6 +23,9 @@ kOT_Veto = 2
 -- game load should be in here.
 
 function OnLoad()
+	-- print out version info for the parser
+	--SendCommand( kPSC_Version, "" )
+
 	-- include the item core
 	SendCommand( kPSC_Include, "itemcore" )
 
@@ -29,7 +33,7 @@ function OnLoad()
 	SendCommand( kPSC_Include, "itemlist" )
 
 	-- and warp to another warp
-	SendCommand( kPSC_Warp, "center000" )
+	SendCommand( kPSC_Warp, "lodge" )
 end
 
 function OnUnload()

@@ -110,6 +110,10 @@ void ProsserShell::SendCommand( int key, std::string param )
 		this->forceExit = true;
 		break;
 
+	case( kPSC_Version ):
+		std::cout << "Prosser SUD " << version << std::endl;
+		break;
+
 	case( kPSC_Null ):
 	default:
 		std::cout << "SendCommand DNF error" << std::endl;
@@ -134,9 +138,6 @@ ProsserShell::ProsserShell( std::string _argv0, bool isWizard )
 	if( !_shared ) {
 		_shared = this;
 	}
-
-	std::cout << "Prosser SUD " << version << std::endl;
-	std::cout << std::endl;
 
 	this->Init();
 

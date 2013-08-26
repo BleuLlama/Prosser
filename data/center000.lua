@@ -22,12 +22,20 @@ exits = {
 	description = "The path also goes to the east." },
 
     { name="Itemtest", alias="I", lua="itemtest",
-	description = "Experiment with items in the 'itemtest' room" }
+	description = "Experiment with items in the 'itemtest' room" },
+
+    { name="Game", alias="g", lua="gamestart",
+	description = "The entrance to the game is here "}
 }
 
 function OnLoad() end
 function OnUnload() end
-function OnPoll() end
+function Poll() end
+		    
+function OnMove( exitname, exitalias ) 
+    print( "Leaving through exit named " .. exitname .. "(" ..  exitalias .. ")" )
+end 
+
 
 function RoomDescription()
 	local T = os.time()
