@@ -56,6 +56,9 @@ Lua files can send commands to the engine using the SendCommand() function.  Cur
  - kPSC_Save		- save the player data to the save file
  - kPSC_Load		- load the player data from the save file
  - kPSC_Include		- load and run the indicated LUA file
+ - kPSC_Restart		- restart the engine, as though it was just loaded
+ - kPSC_Quit		- quit from the engine, prompt for 'enter' to continue
+ - kPSC_Version		- print out the engine version information
 
 The standard operating procedure is to put the Warp to your first room
 within the OnLoad() function of your startup-sequence.
@@ -304,6 +307,7 @@ And Lua:
 		INSTALL_TOP= /home/pi/sw
 	make install
 
-On some systems, like raspberry pi, you may need to also install 'zip'.
+On some systems, like raspberry pi, you may need to also install 'zip' for
+packaging up the lua files and the distribution zip.
 
 	sudo apt-get install zip
