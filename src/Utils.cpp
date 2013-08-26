@@ -12,8 +12,12 @@
 #endif
 
 // for directoruylistings
-#include <sys/types.h>
+#if defined _WIN32 || defined(__MINGW32__)
+#include <dirent.h>
+#else
 #include <sys/dir.h>
+#endif
+#include <sys/types.h>
 #include <vector>
 
 #include <iostream>

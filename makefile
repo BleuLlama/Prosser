@@ -63,6 +63,9 @@ export ARCH := $(shell uname)
 ifeq ($(ARCH),MINGW32_NT-6.1)
 export ARCH := MINGW32
 endif
+ifeq ($(ARCH),MINGW32_NT-5.1)
+export ARCH := MINGW32
+endif
 ifeq ($(ARCH),MINGW32_NT-5.2)
 export ARCH := MINGW32
 endif

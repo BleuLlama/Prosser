@@ -22,10 +22,30 @@ libz.a:
 
 ################################################################################
 
+export ARCH := $(shell uname)
+
+#commonize these
+ifeq ($(ARCH),MINGW32_NT-6.1)
+export ARCH := MINGW32
+endif
+ifeq ($(ARCH),MINGW32_NT-5.1)
+export ARCH := MINGW32
+endif
+ifeq ($(ARCH),MINGW32_NT-5.2)
+export ARCH := MINGW32
+endif
+
+
+################################################################################
+
 MINIZIP_SRCS := \
 		$(MINIZIP_DIR)/ioapi.c \
 		$(MINIZIP_DIR)/unzip.c \
 		$(MINIZIP_DIR)/zip.c
+
+ifeq ($(ARCH),MINGW32)
+MINIZIP_SRCS += $(MINIZIP_DIR)/iowin32.c
+endif
 
 CFLAGS += -I$(MINIZIP_DIR) -I$(ZLIB_DIR) 
 
