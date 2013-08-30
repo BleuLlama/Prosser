@@ -236,16 +236,16 @@ void ProsserShell::PrepCommands( void )
 	commandList[ "get" ] = "get";
 	commandList[ "drop" ] = "drop";
 	commandList[ "use" ] = "use";
-	commandList[ "wear" ] = "use";
-	commandList[ "don" ] = "use";
-	commandList[ "eat" ] = "eat";
+	//commandList[ "wear" ] = "use";
+	//commandList[ "don" ] = "use";
+	//commandList[ "eat" ] = "eat";
 	commandList[ "me" ] = "me";
 	commandList[ "i" ] = "inventory";
 	commandList[ "inventory" ] = "inventory";
 	helpList[ "get" ] = "Pick up an item";
 	helpList[ "drop" ] = "Drop an item";
 	helpList[ "use" ] = "Use an item";
-	helpList[ "eat" ] = "Eat an item";
+	//helpList[ "eat" ] = "Eat an item";
 	helpList[ "inventory" ] = "Get inventory of stuff you have";
 	helpList[ "me" ] = "find out about yourself";
 
@@ -823,8 +823,16 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	if(   (commandList.find( argv[0] ) == commandList.end() )
 	   || (ret == kOT_Veto ))
 	{
-		std::cout << argv[0] << ": What?" << std::endl;
-		return true;
+#define WHAT() \
+	std::cout << argv[0] << ": What?" << std::endl; \
+	return true;
+
+		WHAT();
+	}
+
+#define WHAT2() \
+	if( argv.size() != 2 ) { \
+		WHAT(); \
 	}
 
 	this->age_command++;
@@ -852,11 +860,8 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 
 	if(  StringUtils::SameStringCI( tc, "move" )) {
 		// move with no argument?
-		if( argv.size() == 2 ) {
-			this->Cmd_Move( argv[1] );
-		} else {
-			std::cout << argv[0] << ": What?" << std::endl;
-		}
+		WHAT2();
+		this->Cmd_Move( argv[1] );
 	}
 
 	if(  StringUtils::SameStringCI( tc, "look" )) {
@@ -867,11 +872,26 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		}
 	}
 
-	if(  StringUtils::SameStringCI( tc, "get" )) this->Cmd_Get( param );
-	if(  StringUtils::SameStringCI( tc, "drop" )) this->Cmd_Drop( param );
-	if(  StringUtils::SameStringCI( tc, "use" )) this->Cmd_Use( param );
-	if(  StringUtils::SameStringCI( tc, "eat" )) this->Cmd_Eat( param );
-	if(  StringUtils::SameStringCI( tc, "examine" )) this->Cmd_Exa( param );
+	if(  StringUtils::SameStringCI( tc, "get" )) {
+		WHAT2();
+		this->Cmd_Get( param );
+	}
+	if(  StringUtils::SameStringCI( tc, "drop" )) {
+		WHAT2();
+		this->Cmd_Drop( param );
+	}
+	if(  StringUtils::SameStringCI( tc, "use" )) {
+		WHAT2();
+		this->Cmd_Use( param );
+	}
+	if(  StringUtils::SameStringCI( tc, "eat" )) {
+		WHAT2();
+		this->Cmd_Eat( param );
+	}
+	if(  StringUtils::SameStringCI( tc, "examine" )) {
+		WHAT2();
+		this->Cmd_Exa( param );
+	}
 	if(  StringUtils::SameStringCI( tc, "inventory" )) this->Cmd_Inventory();
 	if(  StringUtils::SameStringCI( tc, "me" )) this->Cmd_Me();
 
