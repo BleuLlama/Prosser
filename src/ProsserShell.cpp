@@ -850,7 +850,14 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 	if(  StringUtils::SameStringCI( tc, "listlive" ) && this->wizard ) this->Cmd_ListLive();
 	
 
-	if(  StringUtils::SameStringCI( tc, "move" )) this->Cmd_Move( argv[1] );
+	if(  StringUtils::SameStringCI( tc, "move" )) {
+		// move with no argument?
+		if( argv.size() == 2 ) {
+			this->Cmd_Move( argv[1] );
+		} else {
+			std::cout << argv[0] << ": What?" << std::endl;
+		}
+	}
 
 	if(  StringUtils::SameStringCI( tc, "look" )) {
 		if( argv.size() >= 2 ) {
@@ -894,9 +901,9 @@ bool ProsserShell::HandleLine( std::vector<std::string> argv )
 		tc.assign( "reload" );
 	}
 
-	if(  StringUtils::SameStringCI( tc, "reload" ) && this->wizard ) this->Cmd_Warp( "" );
+	if( StringUtils::SameStringCI( tc, "reload" ) && this->wizard ) this->Cmd_Warp( "" );
 
-	if(  StringUtils::SameStringCI( tc, "wizard" ) ) this->Cmd_Wizard();
+	if( StringUtils::SameStringCI( tc, "wizard" ) ) this->Cmd_Wizard();
 
 	return true;
 }

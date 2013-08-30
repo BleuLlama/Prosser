@@ -32,6 +32,9 @@ function OnLoad()
 	-- and add the items
 	SendCommand( kPSC_Include, "itemlist" )
 
+	-- and add the helper functions
+	SendCommand( kPSC_Include, "helpers" )
+
 	-- and warp to another warp
 	SendCommand( kPSC_Warp, "lodge" )
 end
